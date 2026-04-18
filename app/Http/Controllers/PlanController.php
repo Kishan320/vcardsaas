@@ -116,13 +116,79 @@ class PlanController extends Controller
         }
 
         return Inertia::render('plans/index', [
-            'plans' => $plans,
-            'billingCycle' => $billingCycle,
-            'hasDefaultPlan' => $hasDefaultPlan,
-            'isAdmin' => true
+            'plans'         => $plans,
+            'monthlyPlans'  => $this->buildAdminPlans('monthly'),
+            'yearlyPlans'   => $this->buildAdminPlans('yearly'),
+            'billingCycle'  => $billingCycle,
+            'hasDefaultPlan'=> $hasDefaultPlan,
+            'isAdmin'       => true,
         ]);
     }
-    
+
+    private function buildAdminPlans(string $cycle): array
+    {
+        $dbPlans = Plan::where(function($q) use ($cycle) {
+            $q->where('duration', $cycle)->orWhere('duration', 'both');
+        })->get();
+
+        $plans = $dbPlans->map(function ($plan) use ($cycle) {
+            $features = [];
+            if ($plan->features) {
+                $featureLabels = [
+                    'custom_domain'       => __('Custom Domain'),
+                    'custom_subdomain'    => __('Subdomain'),
+                    'pwa_support'         => __('PWA'),
+                    'ai_integration'      => __('AI Integration'),
+                    'password_protection' => __('Password Protection'),
+                ];
+                foreach ($plan->getEnabledFeatures() as $f) {
+                    if (isset($featureLabels[$f])) $features[] = $featureLabels[$f];
+                }
+                $sections = $plan->getAllowedTemplateSections();
+                $features[] = __('Template Sections ( :count )', ['count' => count($sections)]);
+            } else {
+                if ($plan->enable_custdomain === 'on')    $features[] = __('Custom Domain');
+                if ($plan->enable_custsubdomain === 'on') $features[] = __('Subdomain');
+                if ($plan->pwa_business === 'on')         $features[] = __('PWA');
+                if ($plan->enable_chatgpt === 'on')       $features[] = __('AI Integration');
+                $features[] = __('Template Sections ( :count )', ['count' => 0]);
+            }
+            $price = $cycle === 'yearly' ? $plan->yearly_price : $plan->price;
+            return [
+                'id'             => $plan->id,
+                'name'           => $plan->name,
+                'price'          => $price,
+                'formattedPrice' => '$' . number_format($price, 2),
+                'duration'       => $cycle === 'yearly' ? 'Yearly' : 'Monthly',
+                'description'    => $plan->description,
+                'trial_days'     => $plan->trial_day,
+                'features'       => $features,
+                'stats'          => [
+                    'businesses'          => $plan->business,
+                    'users'               => $plan->max_users,
+                    'storage'             => $plan->storage_limit . ' GB',
+                    'templates'           => is_array($plan->themes) ? count($plan->themes) : 34,
+                    'bio_links'           => $plan->bio_links,
+                    'bio_links_templates' => is_array($plan->bio_links_themes) ? count($plan->bio_links_themes) : 14,
+                    'addons'              => is_array($plan->addons) ? count($plan->addons) : 0,
+                    'addon_names'         => is_array($plan->addons) ? Addon::whereIn('package_name', $plan->addons)->pluck('name')->toArray() : [],
+                ],
+                'status'      => $plan->is_plan_enable === 'on',
+                'is_default'  => $plan->is_default,
+                'recommended' => false,
+            ];
+        })->toArray();
+
+        $counts = Plan::withCount('users')->get()->pluck('users_count', 'id');
+        if ($counts->isNotEmpty()) {
+            $topId = $counts->keys()->sortByDesc(fn($id) => $counts[$id])->first();
+            foreach ($plans as &$p) {
+                if ($p['id'] == $topId && $p['price'] != '0') { $p['recommended'] = true; break; }
+            }
+        }
+        return $plans;
+    }
+
     /**
      * Toggle plan status
      */

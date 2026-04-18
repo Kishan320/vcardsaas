@@ -125,9 +125,9 @@ import { computed, ref } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import {
     LayoutDashboard, CreditCard, Users, Shield, Key, BarChart3,
-    Calendar, Phone, Package, Tag, DollarSign, Globe, Settings,
+    Calendar, Phone, Package, DollarSign, Globe, Settings,
     FileText, Link2, Image, Megaphone, ChevronRight, ChevronDown, Layers,
-    ShoppingCart, UserCheck, Wallet, Building2, BookOpen, ExternalLink,
+    UserCheck, Wallet, Building2, BookOpen, ExternalLink,
 } from 'lucide-vue-next';
 import type { PageProps } from '@/types';
 
@@ -205,9 +205,18 @@ const navItems: NavItem[] = [
             { label: 'Settings', href: '/campaigns/settings' },
         ],
     },
-    { id: 'plans', label: 'Plans', icon: Package, href: '/plans', group: 'Billing' },
-    { id: 'plan-orders', label: 'Plan Orders', icon: ShoppingCart, href: '/plan-orders', group: 'Billing' },
-    { id: 'coupons', label: 'Coupons', icon: Tag, href: '/coupons', group: 'Billing' },
+    {
+        id: 'plans',
+        label: 'Plans',
+        icon: Package,
+        group: 'Billing',
+        children: [
+            { label: 'Plans', href: '/plans' },
+            { label: 'Plan Requests', href: '/plan-requests' },
+            { label: 'Plan Orders', href: '/plan-orders' },
+            { label: 'Coupons', href: '/coupons' },
+        ],
+    },
     { id: 'currencies', label: 'Currencies', icon: DollarSign, href: '/currencies', group: 'Billing' },
     { id: 'users', label: 'Users', icon: Users, href: '/users', group: 'Admin', superAdminOnly: true },
     { id: 'companies', label: 'Companies', icon: Building2, href: '/companies', group: 'Admin', superAdminOnly: true },

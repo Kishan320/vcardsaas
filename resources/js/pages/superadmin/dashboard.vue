@@ -219,6 +219,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import axios from 'axios';
 import { Link, router } from '@inertiajs/vue3';
 import {
     RefreshCw, BarChart3, Download, Nfc, Building2, CreditCard,
@@ -315,21 +316,18 @@ const pageActions = computed(() => [
         onClick: async () => {
             isExporting.value = true;
             try {
-                const response = await fetch(route('dashboard.export-report'), {
-                    method: 'GET',
+                const response = await axios.get(route('dashboard.export-report'), {
                     headers: { Accept: 'application/pdf' },
+                    responseType: 'blob',
                 });
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `dashboard-report-${new Date().toISOString().split('T')[0]}.pdf`;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-                }
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `dashboard-report-${new Date().toISOString().split('T')[0]}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
             } finally {
                 isExporting.value = false;
             }

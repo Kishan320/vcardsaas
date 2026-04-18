@@ -1,5 +1,5 @@
 import { ref, computed, watch } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import axios from 'axios';
 import { route } from 'ziggy-js';
 
 export interface MediaItem {
@@ -14,14 +14,6 @@ export interface MediaItem {
 }
 
 export function useMediaLibrary() {
-    const page = usePage<any>();
-    const csrfToken = computed(() => {
-        const token = page.props.csrf_token;
-        if (!token) {
-            console.error('CSRF token not found in page props');
-        }
-        return token as string;
-    });
 
     const media = ref<MediaItem[]>([]);
     const filteredMedia = ref<MediaItem[]>([]);
@@ -77,19 +69,11 @@ export function useMediaLibrary() {
     async function fetchMedia() {
         loading.value = true;
         try {
-            const res = await fetch(route('media.index'), {
+            const res = await axios.get(route('media.index'), {
                 headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                credentials: 'same-origin',
             });
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error('fetchMedia failed:', res.status, errorText);
-                throw new Error(`HTTP ${res.status}: ${errorText}`);
-            }
-            const json = await res.json();
-            console.log('fetchMedia response:', json);
+            const json = res.data;
 
-            // Handle various API response formats
             let rawData: any = null;
             if (Array.isArray(json)) {
                 rawData = json;
@@ -97,10 +81,7 @@ export function useMediaLibrary() {
                 rawData = json.data;
             }
 
-            // Normalize to proper array (handles Laravel Collection objects)
             const data = normalizeToArray(rawData);
-            console.log('Normalized data:', data, 'isArray:', Array.isArray(data));
-
             media.value = Array.isArray(data) ? data : [];
             filteredMedia.value = [...(Array.isArray(data) ? data : [])];
         } catch (err) {
@@ -116,24 +97,18 @@ export function useMediaLibrary() {
         const formData = new FormData();
         Array.from(files).forEach(f => formData.append('files[]', f));
         try {
-            const res = await fetch(route('media.batch'), {
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': csrfToken.value, 'X-Requested-With': 'XMLHttpRequest' },
-                body: formData,
-                credentials: 'same-origin',
+            const res = await axios.post(route('media.batch'), formData, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
             });
-            const result = await res.json();
-            if (res.ok) {
-                const uploaded: MediaItem[] = Array.isArray(result.data) ? result.data : [];
-                media.value = [...uploaded, ...(Array.isArray(media.value) ? media.value : [])];
-                filteredMedia.value = [...uploaded, ...(Array.isArray(filteredMedia.value) ? filteredMedia.value : [])];
-                showToast(result.message || 'Uploaded successfully');
-                onSuccess?.(uploaded);
-            } else {
-                showToast(result.message || 'Upload failed', 'error');
-            }
-        } catch {
-            showToast('Upload failed', 'error');
+            const result = res.data;
+            const uploaded: MediaItem[] = Array.isArray(result.data) ? result.data : [];
+            media.value = [...uploaded, ...(Array.isArray(media.value) ? media.value : [])];
+            filteredMedia.value = [...uploaded, ...(Array.isArray(filteredMedia.value) ? filteredMedia.value : [])];
+            showToast(result.message || 'Uploaded successfully');
+            onSuccess?.(uploaded);
+        } catch (err: any) {
+            const msg = err?.response?.data?.message || 'Upload failed';
+            showToast(msg, 'error');
         } finally {
             uploading.value = false;
         }
@@ -142,21 +117,16 @@ export function useMediaLibrary() {
     async function deleteMedia(item: MediaItem) {
         if (!confirm(`Delete "${item.name}"?`)) return false;
         try {
-            const res = await fetch(route('media.destroy', item.id), {
-                method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': csrfToken.value, 'X-Requested-With': 'XMLHttpRequest' },
-                credentials: 'same-origin',
+            await axios.delete(route('media.destroy', item.id), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
             });
-            if (res.ok) {
-                media.value = media.value.filter(i => i.id !== item.id);
-                filteredMedia.value = filteredMedia.value.filter(i => i.id !== item.id);
-                showToast('Deleted successfully');
-                return true;
-            } else {
-                showToast('Delete failed', 'error');
-            }
-        } catch {
-            showToast('Delete failed', 'error');
+            media.value = media.value.filter(i => i.id !== item.id);
+            filteredMedia.value = filteredMedia.value.filter(i => i.id !== item.id);
+            showToast('Deleted successfully');
+            return true;
+        } catch (err: any) {
+            const msg = err?.response?.data?.message || 'Delete failed';
+            showToast(msg, 'error');
         }
         return false;
     }
