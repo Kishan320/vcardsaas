@@ -38,7 +38,7 @@ Route::middleware(['auth', 'verified', 'plan.access'])->group(function () {
     
     // Profile settings page with profile and password sections
     Route::get('profile', function () {
-        return Inertia::render('settings/profile-settings');
+        return Inertia::render('settings/profile');
     })->name('profile');
 
     // Routes for form submissions

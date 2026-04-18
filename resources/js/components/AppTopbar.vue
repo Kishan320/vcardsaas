@@ -80,7 +80,7 @@
                         <p class="text-xs text-gray-500">{{ user?.email }}</p>
                     </div>
                     <Link
-                        :href="route('profile.edit')"
+                        :href="route('profile')"
                         class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                     >
                         <User :size="14" class="text-gray-400" /> Profile

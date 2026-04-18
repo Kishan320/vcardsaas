@@ -1,5 +1,5 @@
 <template>
-    <PageTemplate title="Media Library" url="/media-library" :actions="[{ label: 'Upload Files', icon: Plus, onClick: () => (uploadOpen = true) }]">
+    <PageTemplate title="Media Library" url="/media-library" :actions="[{ label: 'Upload Files', icon: Plus, onClick: () => uploadOpen = true }]">
 
         <!-- Stats + Search -->
         <div class="rounded-xl border bg-white p-4 shadow-sm mb-6">
@@ -65,10 +65,8 @@
                             <div class="text-xs text-gray-500 font-medium">{{ item.mime_type.split('/')[1]?.toUpperCase() }}</div>
                         </div>
 
-                        <!-- Overlay -->
                         <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200" />
 
-                        <!-- Type badge -->
                         <div class="absolute top-2 left-2">
                             <span class="px-1.5 py-0.5 bg-white/90 text-xs font-semibold rounded shadow-sm">
                                 {{ item.mime_type.split('/')[1]?.toUpperCase() }}
@@ -91,11 +89,11 @@
                                     <button @click="copyLink(item)" class="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-50 text-left">
                                         <Copy :size="13" /> Copy Link
                                     </button>
-                                    <button @click="download(item)" class="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-50 text-left">
+                                    <button @click="onDownload(item)" class="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-50 text-left">
                                         <Download :size="13" /> Download
                                     </button>
                                     <div class="border-t my-1" />
-                                    <button @click="deleteItem(item)" class="w-full flex items-center gap-2 px-3 py-2 hover:bg-red-50 text-red-600 text-left">
+                                    <button @click="onDelete(item)" class="w-full flex items-center gap-2 px-3 py-2 hover:bg-red-50 text-red-600 text-left">
                                         <X :size="13" /> Delete
                                     </button>
                                 </div>
@@ -145,7 +143,7 @@
                     @dragenter.prevent="dragActive = true"
                     @dragleave.prevent="dragActive = false"
                     @dragover.prevent
-                    @drop.prevent="handleDrop"
+                    @drop.prevent="onDrop"
                     @click="fileInput?.click()"
                 >
                     <div :class="dragActive ? 'scale-110' : ''" class="transition-transform duration-200">
@@ -164,7 +162,7 @@
                             {{ uploading ? 'Uploading...' : 'Choose Files' }}
                         </button>
                     </div>
-                    <input ref="fileInput" type="file" multiple class="hidden" @change="handleFileChange" />
+                    <input ref="fileInput" type="file" multiple class="hidden" @change="onFileChange" />
                 </div>
             </div>
         </div>
@@ -206,7 +204,7 @@
                     <button @click="copyLink(infoItem)" class="flex-1 flex items-center justify-center gap-2 px-4 py-2 border rounded-lg text-sm hover:bg-gray-50">
                         <Copy :size="14" /> Copy Link
                     </button>
-                    <button @click="download(infoItem)" class="flex-1 flex items-center justify-center gap-2 px-4 py-2 border rounded-lg text-sm hover:bg-gray-50">
+                    <button @click="onDownload(infoItem)" class="flex-1 flex items-center justify-center gap-2 px-4 py-2 border rounded-lg text-sm hover:bg-gray-50">
                         <Download :size="14" /> Download
                     </button>
                 </div>
@@ -217,48 +215,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { ref, computed, onMounted } from 'vue';
 import PageTemplate from '@/components/page-template.vue';
 import { Upload, Search, Copy, Download, ImageIcon, Plus, X, Info, MoreHorizontal, HardDrive, Loader2 } from 'lucide-vue-next';
+import { useMediaLibrary, type MediaItem } from '@/composables/useMediaLibrary';
 
-interface MediaItem {
-    id: number;
-    name: string;
-    file_name: string;
-    url: string;
-    thumb_url: string;
-    size: number;
-    mime_type: string;
-    created_at: string;
-}
+const {
+    filteredMedia, loading, uploading, searchTerm, currentPage, perPage,
+    totalSize, imageCount, totalPages, paginatedMedia,
+    fetchMedia, uploadFiles, deleteMedia,
+    formatSize, formatDate, fileEmoji,
+} = useMediaLibrary();
 
-const page = usePage<any>();
-const csrfToken = computed(() => page.props.csrf_token as string);
-
-const media = ref<MediaItem[]>([]);
-const filteredMedia = ref<MediaItem[]>([]);
-const loading = ref(false);
-const searchTerm = ref('');
-const currentPage = ref(1);
-const perPage = 12;
 const uploadOpen = ref(false);
-const uploading = ref(false);
 const dragActive = ref(false);
 const infoItem = ref<MediaItem | null>(null);
 const openMenu = ref<number | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 
-// Stats
-const totalSize = computed(() => formatSize(filteredMedia.value.reduce((a, i) => a + i.size, 0)));
-const imageCount = computed(() => filteredMedia.value.filter(i => i.mime_type.startsWith('image/')).length);
-
-// Pagination
-const totalPages = computed(() => Math.ceil(filteredMedia.value.length / perPage));
-const paginatedMedia = computed(() => {
-    const start = (currentPage.value - 1) * perPage;
-    return filteredMedia.value.slice(start, start + perPage);
-});
 const pageNumbers = computed(() => {
     const total = totalPages.value;
     const cur = currentPage.value;
@@ -269,85 +243,26 @@ const pageNumbers = computed(() => {
     return pages;
 });
 
-watch(searchTerm, (term) => {
-    filteredMedia.value = term
-        ? media.value.filter(i => i.name.toLowerCase().includes(term.toLowerCase()) || i.file_name.toLowerCase().includes(term.toLowerCase()))
-        : [...media.value];
-    currentPage.value = 1;
-});
-
-async function fetchMedia() {
-    loading.value = true;
-    try {
-        const res = await fetch(route('media.index'), {
-            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-            credentials: 'same-origin',
-        });
-        const data = await res.json();
-        media.value = data;
-        filteredMedia.value = data;
-    } catch {
-        showToast('Failed to load media', 'error');
-    } finally {
-        loading.value = false;
-    }
-}
-
-async function uploadFiles(files: FileList) {
-    uploading.value = true;
-    const formData = new FormData();
-    Array.from(files).forEach(f => formData.append('files[]', f));
-    try {
-        const res = await fetch(route('media.batch'), {
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': csrfToken.value, 'X-Requested-With': 'XMLHttpRequest' },
-            body: formData,
-            credentials: 'same-origin',
-        });
-        const result = await res.json();
-        if (res.ok) {
-            media.value = [...result.data, ...media.value];
-            filteredMedia.value = [...result.data, ...filteredMedia.value];
-            showToast(result.message || 'Uploaded successfully');
-            uploadOpen.value = false;
-        } else {
-            showToast(result.message || 'Upload failed', 'error');
-        }
-    } catch {
-        showToast('Upload failed', 'error');
-    } finally {
-        uploading.value = false;
-    }
-}
-
-function handleFileChange(e: Event) {
+function onFileChange(e: Event) {
     const files = (e.target as HTMLInputElement).files;
-    if (files?.length) uploadFiles(files);
+    if (files?.length) uploadFiles(files, () => { uploadOpen.value = false; });
 }
 
-function handleDrop(e: DragEvent) {
+function onDrop(e: DragEvent) {
     dragActive.value = false;
-    if (e.dataTransfer?.files.length) uploadFiles(e.dataTransfer.files);
+    if (e.dataTransfer?.files.length) uploadFiles(e.dataTransfer.files, () => { uploadOpen.value = false; });
 }
 
-async function deleteItem(item: MediaItem) {
-    if (!confirm(`Delete "${item.name}"?`)) return;
-    try {
-        const res = await fetch(route('media.destroy', item.id), {
-            method: 'DELETE',
-            headers: { 'X-CSRF-TOKEN': csrfToken.value, 'X-Requested-With': 'XMLHttpRequest' },
-            credentials: 'same-origin',
-        });
-        if (res.ok) {
-            media.value = media.value.filter(i => i.id !== item.id);
-            filteredMedia.value = filteredMedia.value.filter(i => i.id !== item.id);
-            showToast('Deleted successfully');
-        } else {
-            showToast('Delete failed', 'error');
-        }
-    } catch {
-        showToast('Delete failed', 'error');
-    }
+async function onDelete(item: MediaItem) {
+    await deleteMedia(item);
+    openMenu.value = null;
+}
+
+function onDownload(item: MediaItem) {
+    const a = document.createElement('a');
+    a.href = route('media.download', item.id);
+    a.download = item.file_name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
     openMenu.value = null;
 }
 
@@ -355,8 +270,7 @@ function copyLink(item: MediaItem) {
     const copy = (text: string) => {
         if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
         const ta = document.createElement('textarea');
-        ta.value = text;
-        ta.style.position = 'fixed'; ta.style.left = '-9999px';
+        ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
         document.body.appendChild(ta); ta.select();
         const ok = document.execCommand('copy');
         document.body.removeChild(ta);
@@ -366,59 +280,24 @@ function copyLink(item: MediaItem) {
     openMenu.value = null;
 }
 
-function download(item: MediaItem) {
-    const a = document.createElement('a');
-    a.href = route('media.download', item.id);
-    a.download = item.file_name;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    openMenu.value = null;
-}
-
-function showInfo(item: MediaItem) {
-    infoItem.value = item;
-    openMenu.value = null;
-}
-
+function showInfo(item: MediaItem) { infoItem.value = item; openMenu.value = null; }
 function toggleMenu(id: number) { openMenu.value = openMenu.value === id ? null : id; }
 function closeMenu(id: number) { if (openMenu.value === id) openMenu.value = null; }
 
-function formatSize(bytes: number) {
-    if (!bytes) return '0 B';
-    const k = 1024, sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
-}
-
-function formatDate(d: string, full = false) {
-    return full ? new Date(d).toLocaleString() : new Date(d).toLocaleDateString();
-}
-
-function fileEmoji(mime: string) {
-    if (mime.startsWith('image/')) return '🖼️';
-    if (mime.includes('pdf')) return '📄';
-    if (mime.includes('word') || mime.includes('document')) return '📝';
-    if (mime.includes('csv') || mime.includes('spreadsheet') || mime.includes('excel')) return '📊';
-    if (mime.startsWith('video/')) return '🎬';
-    if (mime.startsWith('audio/')) return '🎵';
-    return '📁';
-}
-
-// Simple toast
 function showToast(msg: string, type: 'success' | 'error' = 'success') {
     const el = document.createElement('div');
-    el.className = `fixed bottom-4 right-4 z-[9999] px-4 py-3 rounded-lg text-white text-sm shadow-lg transition-all ${type === 'error' ? 'bg-red-600' : 'bg-green-600'}`;
+    el.className = `fixed bottom-4 right-4 z-[9999] px-4 py-3 rounded-lg text-white text-sm shadow-lg ${type === 'error' ? 'bg-red-600' : 'bg-green-600'}`;
     el.textContent = msg;
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 3000);
 }
 
-// v-click-outside directive
 const vClickOutside = {
     mounted(el: HTMLElement, binding: any) {
-        el._clickOutside = (e: Event) => { if (!el.contains(e.target as Node)) binding.value(e); };
-        document.addEventListener('click', el._clickOutside);
+        (el as any)._clickOutside = (e: Event) => { if (!el.contains(e.target as Node)) binding.value(e); };
+        document.addEventListener('click', (el as any)._clickOutside);
     },
-    unmounted(el: HTMLElement) { document.removeEventListener('click', el._clickOutside); },
+    unmounted(el: HTMLElement) { document.removeEventListener('click', (el as any)._clickOutside); },
 };
 
 onMounted(fetchMedia);

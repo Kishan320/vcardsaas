@@ -208,18 +208,30 @@
         <!-- Reset Password Modal -->
         <Modal :show="showResetModal" max-width="sm" :closeable="true" @close="showResetModal = false">
             <div class="p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-5">Reset Password — {{ selectedCompany?.name }}</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">Reset Password</h3>
+                <p class="text-sm text-gray-500 mb-5">{{ selectedCompany?.name }}</p>
                 <Form @submit="submitReset" class="space-y-4" v-slot="{ errors }">
                     <div>
                         <InputLabel value="New Password" required />
                         <Field name="password" :rules="passwordSchema" v-model="resetForm.password">
-                            <TextInput v-model="resetForm.password" type="password" :has-error="!!(errors.password)" class="mt-1.5" />
+                            <TextInput v-model="resetForm.password" type="password" :has-error="!!(errors.password || resetForm.errors.password)" class="mt-1.5" placeholder="Min. 8 characters" />
                         </Field>
                         <ErrorMessage name="password" class="mt-1 text-sm text-red-600" />
+                        <InputError :message="resetForm.errors.password" />
+                    </div>
+                    <div>
+                        <InputLabel value="Confirm Password" required />
+                        <Field name="password_confirmation" :rules="confirmPasswordSchema" v-model="resetForm.password_confirmation">
+                            <TextInput v-model="resetForm.password_confirmation" type="password" :has-error="!!(errors.password_confirmation)" class="mt-1.5" placeholder="Re-enter new password" />
+                        </Field>
+                        <ErrorMessage name="password_confirmation" class="mt-1 text-sm text-red-600" />
                     </div>
                     <div class="flex gap-3 justify-end pt-2">
                         <button type="button" @click="showResetModal = false" class="px-4 py-2 text-sm font-medium border border-gray-200 rounded-lg hover:bg-gray-50">Cancel</button>
-                        <PrimaryButton :disabled="resetForm.processing">Reset</PrimaryButton>
+                        <PrimaryButton :disabled="resetForm.processing">
+                            <Loader2 v-if="resetForm.processing" :size="14" class="mr-1 animate-spin" />
+                            Reset Password
+                        </PrimaryButton>
                     </div>
                 </Form>
             </div>
@@ -272,12 +284,17 @@ const editing = ref<Company | null>(null);
 const selectedCompany = ref<Company | null>(null);
 
 const form = useForm({ name: '', email: '', password: '' });
-const resetForm = useForm({ password: '' });
+const resetForm = useForm({ password: '', password_confirmation: '' });
 const deleteForm = useForm({});
 
 const nameSchema = yup.string().required('Name is required').min(2);
 const emailSchema = yup.string().required('Email is required').email('Invalid email');
 const passwordSchema = yup.string().required('Password is required').min(8, 'At least 8 characters');
+const confirmPasswordSchema = yup.string()
+    .required('Please confirm your password')
+    .test('passwords-match', 'Passwords do not match', function (value) {
+        return value === resetForm.password;
+    });
 
 const initials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 const formatDate = (d: string) => new Date(d).toLocaleDateString();
@@ -299,7 +316,7 @@ const submitForm = () => {
 const loginAs = (c: Company) => router.get(route('impersonate.start', c.id));
 const toggleStatus = (c: Company) => router.put(route('companies.toggle-status', c.id), {});
 const openUpgradePlan = (c: Company) => { selectedCompany.value = c; };
-const openResetPassword = (c: Company) => { selectedCompany.value = c; resetForm.reset(); showResetModal.value = true; };
+const openResetPassword = (c: Company) => { selectedCompany.value = c; resetForm.reset(); resetForm.password = ''; resetForm.password_confirmation = ''; showResetModal.value = true; };
 const submitReset = () => {
     if (!selectedCompany.value) return;
     resetForm.put(route('companies.reset-password', selectedCompany.value.id), { onSuccess: () => { showResetModal.value = false; } });
