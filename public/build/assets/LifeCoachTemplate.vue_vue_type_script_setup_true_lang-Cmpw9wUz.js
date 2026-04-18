@@ -1,1 +1,0 @@
-import{d as o,c as t,k as a,o as l}from"./app-CE9a7kDk.js";const s={class:"lifecoachTemplate"},r=o({__name:"LifeCoachTemplate",setup(c){return(n,e)=>(l(),t("div",s,[...e[0]||(e[0]=[a("h1",null,"LifeCoach Template",-1),a("p",null,"Template placeholder",-1)])]))}});export{r as _};

@@ -1,1 +1,0 @@
-import{M as t}from"./app-CE9a7kDk.js";const o=t.create({baseURL:"/api",headers:{"Content-Type":"application/json","X-Requested-With":"XMLHttpRequest"}}),e=document.querySelector('meta[name="csrf-token"]')?.getAttribute("content");e&&(o.defaults.headers.common["X-CSRF-TOKEN"]=e);export{o as a};

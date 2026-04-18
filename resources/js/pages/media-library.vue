@@ -46,30 +46,37 @@
             </div>
 
             <!-- Media Grid -->
-            <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+            <div v-else-if="Array.isArray(paginatedMedia) && paginatedMedia.length" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
                 <div
-                    v-for="item in paginatedMedia" :key="item.id"
+                    v-for="item in paginatedMedia" :key="item?.id"
                     class="group relative bg-white border rounded-lg overflow-hidden hover:shadow-md transition-all duration-200"
                 >
                     <!-- Preview -->
                     <div class="relative aspect-square bg-gray-50 flex items-center justify-center">
                         <img
-                            v-if="item.mime_type.startsWith('image/')"
+                            v-if="item.mime_type?.startsWith('image/')"
                             :src="item.thumb_url || item.url"
                             :alt="item.name"
                             class="w-full h-full object-cover"
-                            @error="(e) => ((e.target as HTMLImageElement).src = item.url)"
+                            @error="(e) => {
+                                const img = e.target as HTMLImageElement;
+                                if (img.src !== item.url) {
+                                    img.src = item.url;
+                                } else {
+                                    img.style.display = 'none';
+                                }
+                            }"
                         />
                         <div v-else class="flex flex-col items-center justify-center p-4 w-full h-full">
                             <div class="text-2xl mb-1">{{ fileEmoji(item.mime_type) }}</div>
-                            <div class="text-xs text-gray-500 font-medium">{{ item.mime_type.split('/')[1]?.toUpperCase() }}</div>
+                            <div class="text-xs text-gray-500 font-medium">{{ item.mime_type?.split('/')[1]?.toUpperCase() || 'FILE' }}</div>
                         </div>
 
                         <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200" />
 
                         <div class="absolute top-2 left-2">
                             <span class="px-1.5 py-0.5 bg-white/90 text-xs font-semibold rounded shadow-sm">
-                                {{ item.mime_type.split('/')[1]?.toUpperCase() }}
+                                {{ item.mime_type?.split('/')[1]?.toUpperCase() || 'FILE' }}
                             </span>
                         </div>
 
@@ -113,9 +120,9 @@
             </div>
 
             <!-- Pagination -->
-            <div v-if="totalPages > 1" class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t mt-6">
+            <div v-if="totalPages > 1 && Array.isArray(filteredMedia)" class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t mt-6">
                 <p class="text-sm text-gray-500">
-                    Showing {{ (currentPage - 1) * perPage + 1 }}–{{ Math.min(currentPage * perPage, filteredMedia.length) }} of {{ filteredMedia.length }} files
+                    Showing {{ ((currentPage || 1) - 1) * (perPage || 1) + 1 }}–{{ Math.min((currentPage || 1) * (perPage || 1), filteredMedia.length || 0) }} of {{ filteredMedia.length || 0 }} files
                 </p>
                 <div class="flex items-center gap-1">
                     <button @click="currentPage--" :disabled="currentPage === 1" class="px-3 py-1.5 text-sm border rounded-lg disabled:opacity-40 hover:bg-gray-50">Previous</button>
@@ -234,8 +241,8 @@ const openMenu = ref<number | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 
 const pageNumbers = computed(() => {
-    const total = totalPages.value;
-    const cur = currentPage.value;
+    const total = totalPages.value || 0;
+    const cur = currentPage.value || 1;
     const pages: number[] = [];
     const start = Math.max(1, cur - 2);
     const end = Math.min(total, start + 4);

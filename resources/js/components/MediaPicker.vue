@@ -51,8 +51,8 @@
         v-else
         :src="displayUrl"
         :alt="label || 'Preview'"
-        class="max-w-full h-auto rounded border"
-        style="max-height: 200px;"
+        class="max-w-full rounded border object-cover"
+        style="max-height: 120px;"
       />
     </div>
 

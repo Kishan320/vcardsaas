@@ -1,1 +1,0 @@
-import{d as t,c as o,k as a,o as l}from"./app-CE9a7kDk.js";const r={class:"bakeryTemplate"},m=t({__name:"BakeryTemplate",setup(s){return(n,e)=>(l(),o("div",r,[...e[0]||(e[0]=[a("h1",null,"Bakery Template",-1),a("p",null,"Template placeholder",-1)])]))}});export{m as _};

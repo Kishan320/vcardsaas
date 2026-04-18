@@ -1,1 +1,0 @@
-import{d as a,c as s,k as t,o as n}from"./app-CE9a7kDk.js";const o={class:"restaurantTemplate"},m=a({__name:"RestaurantTemplate",setup(r){return(l,e)=>(n(),s("div",o,[...e[0]||(e[0]=[t("h1",null,"Restaurant Template",-1),t("p",null,"Template placeholder",-1)])]))}});export{m as _};

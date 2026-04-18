@@ -1,1 +1,0 @@
-import{d as t,c as l,k as a,o as r}from"./app-CE9a7kDk.js";const n={class:"freelancer-template"},c=t({__name:"FreelancerTemplate",setup(o){return(s,e)=>(r(),l("div",n,[...e[0]||(e[0]=[a("h1",null,"Freelancer Template",-1),a("p",null,"Template placeholder",-1)])]))}});export{c as _};

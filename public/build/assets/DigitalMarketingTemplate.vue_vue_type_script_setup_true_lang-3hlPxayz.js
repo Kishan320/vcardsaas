@@ -1,1 +1,0 @@
-import{d as a,c as l,k as t,o as n}from"./app-CE9a7kDk.js";const o={class:"digitalmarketingTemplate"},p=a({__name:"DigitalMarketingTemplate",setup(i){return(r,e)=>(n(),l("div",o,[...e[0]||(e[0]=[t("h1",null,"DigitalMarketing Template",-1),t("p",null,"Template placeholder",-1)])]))}});export{p as _};

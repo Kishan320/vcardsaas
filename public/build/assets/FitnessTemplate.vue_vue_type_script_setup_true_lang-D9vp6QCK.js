@@ -1,1 +1,0 @@
-import{d as t,c as n,k as s,o as a}from"./app-CE9a7kDk.js";const o={class:"fitnessTemplate"},m=t({__name:"FitnessTemplate",setup(l){return(p,e)=>(a(),n("div",o,[...e[0]||(e[0]=[s("h1",null,"Fitness Template",-1),s("p",null,"Template placeholder",-1)])]))}});export{m as _};

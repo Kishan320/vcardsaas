@@ -1,1 +1,0 @@
-import{d as t,c as r,k as a,o as m}from"./app-CE9a7kDk.js";const n={class:"gamingstreamerTemplate"},p=t({__name:"GamingStreamerTemplate",setup(o){return(s,e)=>(m(),r("div",n,[...e[0]||(e[0]=[a("h1",null,"GamingStreamer Template",-1),a("p",null,"Template placeholder",-1)])]))}});export{p as _};

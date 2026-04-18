@@ -1,1 +1,0 @@
-import{d as n,c as o,k as t,o as l}from"./app-CE9a7kDk.js";const s={class:"consultingTemplate"},c=n({__name:"ConsultingTemplate",setup(a){return(p,e)=>(l(),o("div",s,[...e[0]||(e[0]=[t("h1",null,"Consulting Template",-1),t("p",null,"Template placeholder",-1)])]))}});export{c as _};

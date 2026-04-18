@@ -1,1 +1,0 @@
-import{d as t,c as l,k as a,o}from"./app-CE9a7kDk.js";const s={class:"lawTemplate"},m=t({__name:"LawFirmTemplate",setup(n){return(p,e)=>(o(),l("div",s,[...e[0]||(e[0]=[a("h1",null,"Law Template",-1),a("p",null,"Template placeholder",-1)])]))}});export{m as _};

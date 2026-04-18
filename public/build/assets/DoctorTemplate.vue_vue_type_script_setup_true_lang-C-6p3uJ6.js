@@ -1,1 +1,0 @@
-import{d as t,c as a,k as o,o as l}from"./app-CE9a7kDk.js";const r={class:"doctorTemplate"},c=t({__name:"DoctorTemplate",setup(s){return(n,e)=>(l(),a("div",r,[...e[0]||(e[0]=[o("h1",null,"Doctor Template",-1),o("p",null,"Template placeholder",-1)])]))}});export{c as _};

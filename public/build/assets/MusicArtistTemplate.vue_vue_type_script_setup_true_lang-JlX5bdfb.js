@@ -1,1 +1,0 @@
-import{d as s,c as a,k as t,o}from"./app-CE9a7kDk.js";const l={class:"musicartistTemplate"},c=s({__name:"MusicArtistTemplate",setup(r){return(n,e)=>(o(),a("div",l,[...e[0]||(e[0]=[t("h1",null,"MusicArtist Template",-1),t("p",null,"Template placeholder",-1)])]))}});export{c as _};

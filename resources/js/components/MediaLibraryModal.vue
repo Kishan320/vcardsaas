@@ -102,15 +102,23 @@
                         <!-- Preview -->
                         <div class="relative aspect-square bg-gray-50 flex items-center justify-center">
                             <img
-                                v-if="item.mime_type.startsWith('image/')"
+                                v-if="item.mime_type?.startsWith('image/')"
                                 :src="item.thumb_url || item.url"
                                 :alt="item.name"
                                 class="w-full h-full object-cover"
-                                @error="(e) => ((e.target as HTMLImageElement).src = item.url)"
+                                @error="(e) => {
+                                    const img = e.target as HTMLImageElement;
+                                    if (img.src !== item.url) {
+                                        img.src = item.url;
+                                    } else {
+                                        img.style.display = 'none';
+                                        img.parentElement?.classList.add('bg-gray-100');
+                                    }
+                                }"
                             />
                             <div v-else class="flex flex-col items-center justify-center p-4 w-full h-full">
                                 <div class="text-2xl mb-1">{{ fileEmoji(item.mime_type) }}</div>
-                                <div class="text-xs text-gray-500 font-medium">{{ item.mime_type.split('/')[1]?.toUpperCase() }}</div>
+                                <div class="text-xs text-gray-500 font-medium">{{ item.mime_type?.split('/')[1]?.toUpperCase() || 'FILE' }}</div>
                             </div>
 
                             <!-- Overlay -->
@@ -119,7 +127,7 @@
                             <!-- Type badge -->
                             <div class="absolute top-2 left-2">
                                 <span class="px-1.5 py-0.5 bg-white/90 text-xs font-semibold rounded shadow-sm">
-                                    {{ item.mime_type.split('/')[1]?.toUpperCase() }}
+                                    {{ item.mime_type?.split('/')[1]?.toUpperCase() || 'FILE' }}
                                 </span>
                             </div>
 
@@ -236,13 +244,20 @@ async function onDelete(item: Parameters<typeof deleteMedia>[0]) {
 }
 
 function onFileChange(e: Event) {
-    const files = (e.target as HTMLInputElement).files;
-    if (files?.length) uploadFiles(files);
+    const target = e.target as HTMLInputElement;
+    const files = target.files;
+    if (files?.length) {
+        uploadFiles(files).then(() => {
+            target.value = '';
+        });
+    }
 }
 
 function onDrop(e: DragEvent) {
     dragActive.value = false;
-    if (e.dataTransfer?.files.length) uploadFiles(e.dataTransfer.files);
+    if (e.dataTransfer?.files.length) {
+        uploadFiles(e.dataTransfer.files);
+    }
 }
 
 watch(() => props.isOpen, (open) => {

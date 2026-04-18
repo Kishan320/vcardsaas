@@ -1,1 +1,0 @@
-import{d as t,c as m,k as o,o as a}from"./app-CE9a7kDk.js";const c={class:"ecommerceTemplate"},n=t({__name:"EcommerceTemplate",setup(l){return(r,e)=>(a(),m("div",c,[...e[0]||(e[0]=[o("h1",null,"Ecommerce Template",-1),o("p",null,"Template placeholder",-1)])]))}});export{n as _};

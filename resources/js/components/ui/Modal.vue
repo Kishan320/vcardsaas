@@ -20,10 +20,12 @@
                 >
                     <div
                         v-if="show"
-                        class="relative bg-white rounded-2xl shadow-modal w-full overflow-hidden"
-                        :class="maxWidthClass"
+                        class="relative bg-white rounded-2xl shadow-modal w-full flex flex-col"
+                        :class="[maxWidthClass, 'max-h-[90vh]']"
                     >
-                        <slot />
+                        <div class="overflow-y-auto">
+                            <slot />
+                        </div>
                     </div>
                 </Transition>
             </div>

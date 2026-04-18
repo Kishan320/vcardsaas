@@ -1,1 +1,0 @@
-import{d as t,c as n,k as a,o as r}from"./app-CE9a7kDk.js";const o={class:"veterinarianTemplate"},i=t({__name:"VeterinarianTemplate",setup(l){return(s,e)=>(r(),n("div",o,[...e[0]||(e[0]=[a("h1",null,"Veterinarian Template",-1),a("p",null,"Template placeholder",-1)])]))}});export{i as _};

@@ -65,7 +65,7 @@ class MediaController extends Controller
         });
 
         return response()->json([
-            'data' => $media
+            'data' => $media->values()->all()
         ]);
     }
 
