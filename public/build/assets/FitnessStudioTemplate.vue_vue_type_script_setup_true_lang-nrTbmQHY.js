@@ -1,0 +1,1 @@
+import{d as s,c as o,k as t,o as n}from"./app-CE9a7kDk.js";const a={class:"fitnessstudioTemplate"},r=s({__name:"FitnessStudioTemplate",setup(l){return(p,e)=>(n(),o("div",a,[...e[0]||(e[0]=[t("h1",null,"FitnessStudio Template",-1),t("p",null,"Template placeholder",-1)])]))}});export{r as _};

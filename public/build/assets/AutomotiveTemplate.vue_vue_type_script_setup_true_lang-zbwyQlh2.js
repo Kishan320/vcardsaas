@@ -1,0 +1,1 @@
+import{d as o,c as a,k as t,o as l}from"./app-CE9a7kDk.js";const s={class:"automotiveTemplate"},r=o({__name:"AutomotiveTemplate",setup(m){return(n,e)=>(l(),a("div",s,[...e[0]||(e[0]=[t("h1",null,"Automotive Template",-1),t("p",null,"Template placeholder",-1)])]))}});export{r as _};

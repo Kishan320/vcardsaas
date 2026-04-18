@@ -1,0 +1,1 @@
+import{d as r,c as s,k as t,o as a}from"./app-CE9a7kDk.js";const n={class:"architectdesignerTemplate"},p=r({__name:"ArchitectDesignerTemplate",setup(c){return(o,e)=>(a(),s("div",n,[...e[0]||(e[0]=[t("h1",null,"ArchitectDesigner Template",-1),t("p",null,"Template placeholder",-1)])]))}});export{p as _};

@@ -1,0 +1,1 @@
+import{d as r,c as n,k as a,o}from"./app-CE9a7kDk.js";const t={class:"personaltrainerTemplate"},m=r({__name:"PersonalTrainerTemplate",setup(l){return(s,e)=>(o(),n("div",t,[...e[0]||(e[0]=[a("h1",null,"PersonalTrainer Template",-1),a("p",null,"Template placeholder",-1)])]))}});export{m as _};

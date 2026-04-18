@@ -1,0 +1,1 @@
+import{d as t,c as a,k as o,o as p}from"./app-CE9a7kDk.js";const l={class:"photographyTemplate"},m=t({__name:"PhotographyTemplate",setup(r){return(s,e)=>(p(),a("div",l,[...e[0]||(e[0]=[o("h1",null,"Photography Template",-1),o("p",null,"Template placeholder",-1)])]))}});export{m as _};

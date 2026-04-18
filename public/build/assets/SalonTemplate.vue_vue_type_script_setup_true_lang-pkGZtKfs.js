@@ -1,0 +1,1 @@
+import{d as o,c as l,k as a,o as t}from"./app-CE9a7kDk.js";const n={class:"salonTemplate"},m=o({__name:"SalonTemplate",setup(s){return(p,e)=>(t(),l("div",n,[...e[0]||(e[0]=[a("h1",null,"Salon Template",-1),a("p",null,"Template placeholder",-1)])]))}});export{m as _};

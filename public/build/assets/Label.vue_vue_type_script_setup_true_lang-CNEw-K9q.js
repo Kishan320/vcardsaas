@@ -1,0 +1,1 @@
+import{d as a,c as s,n as l,r as o,o as t}from"./app-CE9a7kDk.js";const d=a({__name:"Label",setup(n){return(e,r)=>(t(),s("label",{"data-slot":"label",class:l(["text-sm leading-none font-medium select-none peer-disabled:cursor-not-allowed peer-disabled:opacity-50",e.$attrs.class])},[o(e.$slots,"default")],2))}});export{d as _};

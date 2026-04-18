@@ -1,0 +1,1 @@
+import{d as s,c as a,k as t,o}from"./app-CE9a7kDk.js";const l={class:"beautycosmeticsTemplate"},p=s({__name:"BeautyCosmeticsTemplate",setup(c){return(m,e)=>(o(),a("div",l,[...e[0]||(e[0]=[t("h1",null,"BeautyCosmetics Template",-1),t("p",null,"Template placeholder",-1)])]))}});export{p as _};

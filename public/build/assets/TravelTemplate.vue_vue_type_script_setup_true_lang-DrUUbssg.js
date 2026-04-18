@@ -1,0 +1,1 @@
+import{d as t,c as l,k as a,o}from"./app-CE9a7kDk.js";const r={class:"travelTemplate"},m=t({__name:"TravelTemplate",setup(s){return(n,e)=>(o(),l("div",r,[...e[0]||(e[0]=[a("h1",null,"Travel Template",-1),a("p",null,"Template placeholder",-1)])]))}});export{m as _};

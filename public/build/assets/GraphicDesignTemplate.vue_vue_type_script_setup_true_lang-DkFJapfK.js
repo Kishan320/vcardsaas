@@ -1,0 +1,1 @@
+import{d as s,c as t,k as a,o as n}from"./app-CE9a7kDk.js";const p={class:"graphicdesignTemplate"},c=s({__name:"GraphicDesignTemplate",setup(o){return(l,e)=>(n(),t("div",p,[...e[0]||(e[0]=[a("h1",null,"GraphicDesign Template",-1),a("p",null,"Template placeholder",-1)])]))}});export{c as _};

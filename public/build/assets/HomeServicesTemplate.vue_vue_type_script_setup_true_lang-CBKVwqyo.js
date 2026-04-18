@@ -1,0 +1,1 @@
+import{d as s,c as t,k as o,o as a}from"./app-CE9a7kDk.js";const l={class:"homeservicesTemplate"},p=s({__name:"HomeServicesTemplate",setup(r){return(m,e)=>(a(),t("div",l,[...e[0]||(e[0]=[o("h1",null,"HomeServices Template",-1),o("p",null,"Template placeholder",-1)])]))}});export{p as _};

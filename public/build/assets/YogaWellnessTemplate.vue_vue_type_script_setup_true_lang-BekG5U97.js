@@ -1,0 +1,1 @@
+import{d as s,c as a,k as l,o}from"./app-CE9a7kDk.js";const t={class:"yogawellnessTemplate"},m=s({__name:"YogaWellnessTemplate",setup(n){return(p,e)=>(o(),a("div",t,[...e[0]||(e[0]=[l("h1",null,"YogaWellness Template",-1),l("p",null,"Template placeholder",-1)])]))}});export{m as _};

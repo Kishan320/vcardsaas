@@ -1,0 +1,1 @@
+import{d as t,c as a,k as n,o as l}from"./app-CE9a7kDk.js";const o={class:"eventplannerTemplate"},m=t({__name:"EventPlannerTemplate",setup(p){return(r,e)=>(l(),a("div",o,[...e[0]||(e[0]=[n("h1",null,"EventPlanner Template",-1),n("p",null,"Template placeholder",-1)])]))}});export{m as _};

@@ -1,0 +1,1 @@
+import{d as l,c as t,k as o,o as a}from"./app-CE9a7kDk.js";const r={class:"fooddeliveryTemplate"},d=l({__name:"FoodDeliveryTemplate",setup(s){return(n,e)=>(a(),t("div",r,[...e[0]||(e[0]=[o("h1",null,"FoodDelivery Template",-1),o("p",null,"Template placeholder",-1)])]))}});export{d as _};

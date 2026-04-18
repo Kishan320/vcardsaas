@@ -1,0 +1,1 @@
+import{d as a,c as o,k as t,o as l}from"./app-CE9a7kDk.js";const p={class:"petcareTemplate"},c=a({__name:"PetCareTemplate",setup(r){return(s,e)=>(l(),o("div",p,[...e[0]||(e[0]=[t("h1",null,"PetCare Template",-1),t("p",null,"Template placeholder",-1)])]))}});export{c as _};

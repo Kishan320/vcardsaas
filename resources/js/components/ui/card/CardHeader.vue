@@ -1,0 +1,11 @@
+<template>
+  <div
+    :class="['flex flex-col space-y-1.5 p-6', $attrs.class]"
+  >
+    <slot />
+  </div>
+</template>
+
+<script setup lang="ts">
+// CardHeader component
+</script>

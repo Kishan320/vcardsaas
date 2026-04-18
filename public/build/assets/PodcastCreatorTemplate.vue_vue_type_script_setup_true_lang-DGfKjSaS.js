@@ -1,0 +1,1 @@
+import{d as a,c as o,k as t,o as r}from"./app-CE9a7kDk.js";const s={class:"podcastcreatorTemplate"},n=a({__name:"PodcastCreatorTemplate",setup(l){return(p,e)=>(r(),o("div",s,[...e[0]||(e[0]=[t("h1",null,"PodcastCreator Template",-1),t("p",null,"Template placeholder",-1)])]))}});export{n as _};
