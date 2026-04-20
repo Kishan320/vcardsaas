@@ -3,13 +3,13 @@
     <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
         <div>
-          <span class="text-sm font-semibold text-primary-600 uppercase tracking-wider">Get in Touch</span>
-          <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2 mb-4">We'd Love to Hear From You</h2>
-          <p class="text-gray-500 leading-relaxed mb-8">Have a question about our plans, need help getting started, or want to discuss enterprise options? Our team is here to help.</p>
+          <span class="text-sm font-semibold text-primary-600 uppercase tracking-wider">{{ data?.badge || 'Get in Touch' }}</span>
+          <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2 mb-4">{{ data?.title || "We'd Love to Hear From You" }}</h2>
+          <p class="text-gray-500 leading-relaxed mb-8">{{ data?.subtitle || data?.description || 'Have a question about our plans, need help getting started, or want to discuss enterprise options? Our team is here to help.' }}</p>
 
           <div class="space-y-4">
-            <div v-for="item in contactInfo" :key="item.id" class="flex items-center gap-4">
-              <div :class="`w-10 h-10 rounded-xl ${item.bg} ${item.iconColor} flex items-center justify-center flex-shrink-0`">
+            <div v-for="item in displayContactInfo" :key="item.id" class="flex items-center gap-4">
+              <div :class="`w-10 h-10 rounded-xl ${item.bg || 'bg-primary-50'} ${item.iconColor || 'text-primary-600'} flex items-center justify-center flex-shrink-0`" :style="item.bg ? {} : { backgroundColor: 'var(--secondary-color)', color: 'white' }">
                 <component :is="item.icon" :size="18" />
               </div>
               <div>
@@ -60,21 +60,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { Mail, Phone, MapPin, CheckCircle2, Loader2 } from 'lucide-vue-next';
 
-const props = defineProps<{ settings?: any }>();
+const props = defineProps<{ 
+  settings?: any;
+  data?: any;
+}>();
 
 const form = ref({ name: '', email: '', subject: '', message: '' });
 const loading = ref(false);
 const success = ref(false);
 
-const contactInfo = [
-  { id: 'ci-email', icon: Mail, label: 'Email Us', value: props.settings?.contact_email || 'hello@vcardsaas.com', bg: 'bg-primary-50', iconColor: 'text-primary-600' },
-  { id: 'ci-phone', icon: Phone, label: 'Call Us', value: props.settings?.contact_phone || '+1 (888) 000-0000', bg: 'bg-green-50', iconColor: 'text-green-600' },
-  { id: 'ci-address', icon: MapPin, label: 'Address', value: props.settings?.contact_address || 'San Francisco, CA', bg: 'bg-amber-50', iconColor: 'text-amber-600' },
-];
+const displayContactInfo = computed(() => [
+  { id: 'ci-email', icon: Mail, label: 'Email Us', value: props.data?.email || props.settings?.contact_email || 'hello@vcardsaas.com', bg: 'bg-primary-50', iconColor: 'text-primary-600' },
+  { id: 'ci-phone', icon: Phone, label: 'Call Us', value: props.data?.phone || props.settings?.contact_phone || '+1 (888) 000-0000', bg: 'bg-green-50', iconColor: 'text-green-600' },
+  { id: 'ci-address', icon: MapPin, label: 'Address', value: props.data?.address || props.settings?.contact_address || 'San Francisco, CA', bg: 'bg-amber-50', iconColor: 'text-amber-600' },
+]);
 
 const submit = () => {
   loading.value = true;

@@ -18,19 +18,28 @@
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="border-b bg-gray-50">
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Currency</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">#</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Code</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Symbol</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Exchange Rate</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Description</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Default</th>
                                 <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50">
-                            <tr v-for="currency in currencies.data" :key="currency.id" class="hover:bg-gray-50 transition-colors">
+                            <tr v-for="(currency, index) in currencies.data" :key="currency.id" class="hover:bg-gray-50 transition-colors">
+                                <td class="px-4 py-3 text-gray-500">{{ (currencies.from ?? 0) + index }}</td>
                                 <td class="px-4 py-3 font-medium text-gray-900">{{ currency.name }}</td>
                                 <td class="px-4 py-3"><code class="text-xs bg-gray-100 px-2 py-0.5 rounded font-mono">{{ currency.code }}</code></td>
-                                <td class="px-4 py-3 text-lg font-semibold text-gray-700">{{ currency.symbol }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-600">{{ currency.exchange_rate }}</td>
+                                <td class="px-4 py-3 font-semibold text-gray-700">{{ currency.symbol }}</td>
+                                <td class="px-4 py-3 text-gray-600">{{ currency.description }}</td>
+                                <td class="px-4 py-3">
+                                    <span class="text-xs px-2.5 py-0.5 rounded-full font-medium"
+                                        :class="currency.is_default ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'">
+                                        {{ currency.is_default ? 'Yes' : 'No' }}
+                                    </span>
+                                </td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center justify-end gap-1">
                                         <button @click="openEdit(currency)" class="p-1.5 rounded-lg hover:bg-amber-50 text-amber-500 transition-colors"><Pencil :size="15" /></button>
@@ -39,7 +48,7 @@
                                 </td>
                             </tr>
                             <tr v-if="!currencies.data?.length">
-                                <td colspan="5" class="px-4 py-12 text-center text-sm text-gray-400">No currencies found</td>
+                                <td colspan="7" class="px-4 py-12 text-center text-sm text-gray-400">No currencies found</td>
                             </tr>
                         </tbody>
                     </table>
@@ -48,53 +57,48 @@
             </div>
         </div>
 
+        <!-- Add/Edit Modal -->
         <Modal :show="showModal" max-width="sm" :closeable="true" @close="closeModal">
             <div class="p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-5">{{ editing ? 'Edit Currency' : 'Add Currency' }}</h3>
-                <Form @submit="submitForm" class="space-y-4" v-slot="{ errors }">
+                <h3 class="text-lg font-semibold text-gray-900 mb-5">{{ editing ? 'Edit Currency' : 'Add New Currency' }}</h3>
+                <form @submit.prevent="submitForm" class="space-y-4">
                     <div>
                         <InputLabel value="Currency Name" required />
-                        <Field name="name" :rules="nameSchema" v-model="form.name">
-                            <TextInput v-model="form.name" type="text" :has-error="!!(errors.name || form.errors.name)" class="mt-1.5" placeholder="US Dollar" />
-                        </Field>
-                        <ErrorMessage name="name" class="mt-1 text-sm text-red-600" />
+                        <TextInput v-model="form.name" type="text" class="mt-1.5" placeholder="e.g. US Dollar, Euro, British Pound" />
                         <InputError :message="form.errors.name" />
                     </div>
                     <div>
-                        <InputLabel value="Code" required />
-                        <Field name="code" :rules="codeSchema" v-model="form.code">
-                            <TextInput v-model="form.code" type="text" :has-error="!!(errors.code || form.errors.code)" class="mt-1.5 uppercase" placeholder="USD" />
-                        </Field>
-                        <ErrorMessage name="code" class="mt-1 text-sm text-red-600" />
+                        <InputLabel value="Currency Code" required />
+                        <TextInput v-model="form.code" type="text" class="mt-1.5 uppercase" placeholder="e.g. USD, EUR, GBP" />
                         <InputError :message="form.errors.code" />
                     </div>
                     <div>
-                        <InputLabel value="Symbol" required />
-                        <Field name="symbol" :rules="symbolSchema" v-model="form.symbol">
-                            <TextInput v-model="form.symbol" type="text" :has-error="!!(errors.symbol || form.errors.symbol)" class="mt-1.5" placeholder="$" />
-                        </Field>
-                        <ErrorMessage name="symbol" class="mt-1 text-sm text-red-600" />
+                        <InputLabel value="Currency Symbol" required />
+                        <TextInput v-model="form.symbol" type="text" class="mt-1.5" placeholder="e.g. $, €, £" />
                         <InputError :message="form.errors.symbol" />
                     </div>
                     <div>
-                        <InputLabel value="Exchange Rate" required />
-                        <Field name="exchange_rate" :rules="rateSchema" v-model="form.exchange_rate">
-                            <TextInput v-model="form.exchange_rate" type="number" step="0.0001" :has-error="!!(errors.exchange_rate || form.errors.exchange_rate)" class="mt-1.5" placeholder="1.0000" />
-                        </Field>
-                        <ErrorMessage name="exchange_rate" class="mt-1 text-sm text-red-600" />
-                        <InputError :message="form.errors.exchange_rate" />
+                        <InputLabel value="Description" />
+                        <textarea v-model="form.description" rows="3" placeholder="Optional description about the currency"
+                            class="mt-1.5 w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-200 resize-none" />
+                        <InputError :message="form.errors.description" />
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="is_default" v-model="form.is_default" class="w-4 h-4 rounded text-primary accent-primary" />
+                        <label for="is_default" class="text-sm font-medium text-gray-700">Set as Default Currency</label>
                     </div>
                     <div class="flex gap-3 justify-end pt-2">
                         <button type="button" @click="closeModal" class="px-4 py-2 text-sm font-medium border border-gray-200 rounded-lg hover:bg-gray-50">Cancel</button>
                         <PrimaryButton :disabled="form.processing">
                             <Loader2 v-if="form.processing" :size="14" class="mr-1 animate-spin" />
-                            {{ editing ? 'Update' : 'Create' }}
+                            {{ editing ? 'Update' : 'Save' }}
                         </PrimaryButton>
                     </div>
-                </Form>
+                </form>
             </div>
         </Modal>
 
+        <!-- Delete Modal -->
         <Modal :show="showDeleteModal" max-width="sm" :closeable="true" @close="showDeleteModal = false">
             <div class="p-6">
                 <h3 class="font-semibold text-gray-900 mb-2">Delete Currency</h3>
@@ -111,8 +115,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import { Form, Field, ErrorMessage } from 'vee-validate';
-import * as yup from 'yup';
 import { Plus, Pencil, Trash2, Loader2 } from 'lucide-vue-next';
 import AppLayout from '@/layouts/AppLayout.vue';
 import FlashMessage from '@/components/ui/FlashMessage.vue';
@@ -123,7 +125,10 @@ import InputError from '@/components/ui/InputError.vue';
 import TextInput from '@/components/ui/TextInput.vue';
 import PrimaryButton from '@/components/ui/PrimaryButton.vue';
 
-interface Currency { id: number; name: string; code: string; symbol: string; exchange_rate: number }
+interface Currency {
+    id: number; name: string; code: string; symbol: string;
+    description?: string; is_default: boolean;
+}
 
 const props = defineProps<{
     currencies: { data: Currency[]; links: any[]; from?: number; to?: number; total?: number };
@@ -134,16 +139,16 @@ const showDeleteModal = ref(false);
 const editing = ref<Currency | null>(null);
 const selectedCurrency = ref<Currency | null>(null);
 
-const form = useForm({ name: '', code: '', symbol: '', exchange_rate: '' });
+const form = useForm({ name: '', code: '', symbol: '', description: '', is_default: false });
 const deleteForm = useForm({});
 
-const nameSchema = yup.string().required('Name is required');
-const codeSchema = yup.string().required('Code is required').length(3, 'Must be 3 characters');
-const symbolSchema = yup.string().required('Symbol is required');
-const rateSchema = yup.number().required('Rate is required').min(0);
-
 const openCreate = () => { editing.value = null; form.reset(); showModal.value = true; };
-const openEdit = (c: Currency) => { editing.value = c; form.name = c.name; form.code = c.code; form.symbol = c.symbol; form.exchange_rate = String(c.exchange_rate); showModal.value = true; };
+const openEdit = (c: Currency) => {
+    editing.value = c;
+    form.name = c.name; form.code = c.code; form.symbol = c.symbol;
+    form.description = c.description ?? ''; form.is_default = c.is_default;
+    showModal.value = true;
+};
 const closeModal = () => { showModal.value = false; form.reset(); editing.value = null; };
 
 const submitForm = () => {

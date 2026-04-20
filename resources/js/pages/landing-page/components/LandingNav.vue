@@ -2,14 +2,22 @@
   <nav :class="`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100' : 'bg-transparent'}`">
     <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
-        <div class="flex items-center gap-2">
-          <div class="w-9 h-9 rounded-xl bg-primary-600 flex items-center justify-center flex-shrink-0">
-            <CreditCard :size="18" class="text-white" />
+        <Link href="/" class="flex items-center gap-2 group">
+          <div v-if="scrolled && theme?.logo_light" class="h-8">
+            <img :src="theme.logo_light" class="h-full w-auto object-contain" :alt="settings?.titleText || 'vCard SaaS'" />
           </div>
-          <span :class="`font-bold text-xl tracking-tight ${scrolled ? 'text-gray-900' : 'text-white'}`">
-            {{ settings?.titleText || 'vCard SaaS' }}
-          </span>
-        </div>
+          <div v-else-if="!scrolled && theme?.logo_dark" class="h-8">
+            <img :src="theme.logo_dark" class="h-full w-auto object-contain" :alt="settings?.titleText || 'vCard SaaS'" />
+          </div>
+          <div v-else class="flex items-center gap-2">
+            <div class="w-9 h-9 rounded-xl bg-primary-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-200">
+              <CreditCard :size="18" class="text-white" />
+            </div>
+            <span :class="`font-bold text-xl tracking-tight ${scrolled ? 'text-gray-900' : 'text-white'}`">
+              {{ settings?.titleText || 'vCard SaaS' }}
+            </span>
+          </div>
+        </Link>
 
         <div class="hidden md:flex items-center gap-6">
           <a v-for="item in navLinks" :key="item.id" :href="item.href"
@@ -22,7 +30,7 @@
           <Link :href="route('login')" :class="`text-sm font-medium transition-colors ${scrolled ? 'text-gray-600 hover:text-primary-600' : 'text-white/80 hover:text-white'}`">
             Sign In
           </Link>
-          <Link :href="route('register')" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg transition-all duration-150 active:scale-95">
+          <Link :href="route('register')" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg transition-all duration-150 active:scale-95 shadow-md">
             Get Started Free
           </Link>
         </div>
@@ -35,6 +43,7 @@
       </div>
     </div>
 
+    <!-- Mobile Menu -->
     <div v-if="mobileOpen" class="md:hidden bg-white border-t border-gray-100 shadow-lg animate-fade-in">
       <div class="px-4 py-3 space-y-1">
         <a v-for="item in navLinks" :key="`m-${item.id}`" :href="item.href"
@@ -44,7 +53,7 @@
         </a>
         <div class="pt-2 border-t border-gray-100 flex flex-col gap-2">
           <Link :href="route('login')" class="px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors text-center">Sign In</Link>
-          <Link :href="route('register')" class="px-4 py-2.5 bg-primary-600 text-white text-sm font-semibold rounded-lg text-center transition-colors hover:bg-primary-700">Get Started Free</Link>
+          <Link :href="route('register')" class="px-4 py-2.5 bg-primary-600 text-white text-sm font-semibold rounded-lg text-center transition-colors hover:bg-primary-700 shadow-sm">Get Started Free</Link>
         </div>
       </div>
     </div>
@@ -56,7 +65,10 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { Menu, X, CreditCard } from 'lucide-vue-next';
 
-defineProps<{ settings?: any }>();
+defineProps<{ 
+  settings?: any;
+  theme?: any;
+}>();
 
 const scrolled = ref(false);
 const mobileOpen = ref(false);

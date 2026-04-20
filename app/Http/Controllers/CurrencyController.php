@@ -46,12 +46,13 @@ class CurrencyController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'code' => 'required|string|max:10|unique:currencies',
-            'symbol' => 'required|string|max:10',
-            'description' => 'nullable|string',
-            'is_default' => 'boolean',
+            'name'        => 'required|string|max:255',
+            'code'        => 'required|string|max:10|unique:currencies',
+            'symbol'      => 'required|string|max:10',
+            'description' => 'nullable|string|max:500',
+            'is_default'  => 'boolean',
         ]);
+        $validated['is_default'] = $request->boolean('is_default');
         
         // If this is set as default, unset all other defaults
         if ($request->input('is_default')) {
@@ -69,12 +70,13 @@ class CurrencyController extends Controller
     public function update(Request $request, Currency $currency)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'code' => 'required|string|max:10|unique:currencies,code,' . $currency->id,
-            'symbol' => 'required|string|max:10',
-            'description' => 'nullable|string',
-            'is_default' => 'boolean',
+            'name'        => 'required|string|max:255',
+            'code'        => 'required|string|max:10|unique:currencies,code,' . $currency->id,
+            'symbol'      => 'required|string|max:10',
+            'description' => 'nullable|string|max:500',
+            'is_default'  => 'boolean',
         ]);
+        $validated['is_default'] = $request->boolean('is_default');
         
         // If this is set as default, unset all other defaults
         if ($request->input('is_default')) {

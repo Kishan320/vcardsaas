@@ -36,6 +36,10 @@ class ReferralController extends Controller
         $totalReferralUsers = User::whereNotNull('used_referral_code')->count();
         $pendingPayouts = PayoutRequest::where('status', 'pending')->count();
         $totalCommissionPaid = PayoutRequest::where('status', 'approved')->sum('amount');
+        $totalCommissionEarned = Referral::sum('amount');
+        $usersWithPlans = User::whereNotNull('used_referral_code')
+            ->whereNotNull('plan_id')
+            ->count();
         
         $monthlyReferrals = User::whereNotNull('used_referral_code')
             ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
@@ -61,6 +65,14 @@ class ReferralController extends Controller
             ->limit(10)
             ->get();
 
+        $referredUsers = User::whereNotNull('used_referral_code')
+            ->with(['plan', 'referrals', 'planOrders' => function($query) {
+                $query->where('status', 'approved')->orderBy('created_at', 'desc')->limit(1);
+            }])
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
         $payoutRequests = PayoutRequest::with('company')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
@@ -72,11 +84,14 @@ class ReferralController extends Controller
                 'totalReferralUsers' => $totalReferralUsers,
                 'pendingPayouts' => $pendingPayouts,
                 'totalCommissionPaid' => $totalCommissionPaid,
+                'totalCommissionEarned' => $totalCommissionEarned,
+                'usersWithPlans' => $usersWithPlans,
                 'monthlyReferrals' => $monthlyReferrals,
                 'monthlyPayouts' => $monthlyPayouts,
                 'topCompanies' => $topCompanies,
             ],
             'payoutRequests' => $payoutRequests,
+            'referredUsers' => $referredUsers,
         ]);
     }
 

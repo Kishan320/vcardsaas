@@ -4,7 +4,7 @@
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 mb-12">
         <div class="col-span-2">
           <div class="flex items-center gap-2 mb-4">
-            <div class="w-9 h-9 rounded-xl bg-primary-600 flex items-center justify-center">
+            <div class="w-9 h-9 rounded-xl bg-primary-600 flex items-center justify-center" :style="{ backgroundColor: 'var(--secondary-color)' }">
               <CreditCard :size="18" class="text-white" />
             </div>
             <span class="font-bold text-xl text-white">{{ settings?.titleText || 'vCard SaaS' }}</span>
@@ -13,8 +13,8 @@
             {{ settings?.footerText || 'The all-in-one digital business card platform for professionals who want to make lasting impressions.' }}
           </p>
           <div class="flex gap-2">
-            <a v-for="s in socials" :key="s.id" :href="s.href" :aria-label="s.label"
-              class="w-9 h-9 rounded-lg bg-gray-800 hover:bg-primary-600 flex items-center justify-center text-gray-400 hover:text-white transition-all duration-150">
+            <a v-for="s in displaySocials" :key="s.id" :href="s.href" :aria-label="s.label"
+              class="w-9 h-9 rounded-lg bg-gray-800 hover:bg-primary-600 flex items-center justify-center text-gray-400 hover:text-white transition-all duration-150" :style="scrolled ? {} : { '--hover-bg': 'var(--secondary-color)' }">
               <component :is="s.icon" :size="18" />
             </a>
           </div>
@@ -32,9 +32,9 @@
 
       <div class="border-t border-gray-800 pt-8 mb-8">
         <div class="flex flex-wrap gap-6 text-sm">
-          <div class="flex items-center gap-2"><Mail :size="14" class="text-primary-400" /><span>{{ settings?.contact_email || 'hello@vcardsaas.com' }}</span></div>
-          <div v-if="settings?.contact_phone" class="flex items-center gap-2"><Phone :size="14" class="text-primary-400" /><span>{{ settings.contact_phone }}</span></div>
-          <div v-if="settings?.contact_address" class="flex items-center gap-2"><MapPin :size="14" class="text-primary-400" /><span>{{ settings.contact_address }}</span></div>
+          <div class="flex items-center gap-2"><Mail :size="14" class="text-primary-400" :style="{ color: 'var(--secondary-color)' }" /><span>{{ settings?.contact_email || 'hello@vcardsaas.com' }}</span></div>
+          <div v-if="settings?.contact_phone" class="flex items-center gap-2"><Phone :size="14" class="text-primary-400" :style="{ color: 'var(--secondary-color)' }" /><span>{{ settings.contact_phone }}</span></div>
+          <div v-if="settings?.contact_address" class="flex items-center gap-2"><MapPin :size="14" class="text-primary-400" :style="{ color: 'var(--secondary-color)' }" /><span>{{ settings.contact_address }}</span></div>
         </div>
       </div>
 
@@ -49,52 +49,61 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { Mail, Phone, MapPin, Twitter, Linkedin, Instagram, Youtube, Facebook, CreditCard } from 'lucide-vue-next';
 
-defineProps<{ settings?: any }>();
+const props = defineProps<{ 
+  settings?: any;
+  theme?: any;
+  data?: any;
+}>();
 
-const socials = [
-  { id: 'soc-twitter', icon: Twitter, href: '#', label: 'Twitter' },
-  { id: 'soc-linkedin', icon: Linkedin, href: '#', label: 'LinkedIn' },
-  { id: 'soc-instagram', icon: Instagram, href: '#', label: 'Instagram' },
-  { id: 'soc-youtube', icon: Youtube, href: '#', label: 'YouTube' },
-  { id: 'soc-facebook', icon: Facebook, href: '#', label: 'Facebook' },
-];
+const icons: Record<string, any> = {
+  Twitter, Linkedin, Instagram, Youtube, Facebook
+};
+
+const displaySocials = computed(() => {
+  // If we have socials in the footer data from settings
+  if (props.data?.social_links && props.data.social_links.length > 0) {
+    return props.data.social_links.map((s: any, idx: number) => ({
+      id: `soc-${idx}`,
+      icon: icons[s.icon] || Globe,
+      href: s.href || '#',
+      label: s.name || s.icon
+    }));
+  }
+  return [
+    { id: 'soc-twitter', icon: Twitter, href: '#', label: 'Twitter' },
+    { id: 'soc-linkedin', icon: Linkedin, href: '#', label: 'LinkedIn' },
+    { id: 'soc-instagram', icon: Instagram, href: '#', label: 'Instagram' },
+  ];
+});
 
 const footerLinks = {
   Product: [
     { id: 'fl-features', label: 'Features', href: '#features' },
     { id: 'fl-templates', label: 'Templates', href: '#templates' },
     { id: 'fl-pricing', label: 'Pricing', href: '#plans' },
-    { id: 'fl-biolinks', label: 'Bio Links', href: '#' },
-    { id: 'fl-nfc', label: 'NFC Cards', href: '#' },
   ],
   Platform: [
     { id: 'fl-dashboard', label: 'Dashboard', href: '/dashboard' },
     { id: 'fl-analytics', label: 'Analytics', href: '#' },
     { id: 'fl-domain', label: 'Custom Domain', href: '#' },
-    { id: 'fl-api', label: 'API Access', href: '#' },
-    { id: 'fl-integrations', label: 'Integrations', href: '#' },
   ],
   Resources: [
     { id: 'fl-docs', label: 'Documentation', href: '#' },
     { id: 'fl-blog', label: 'Blog', href: '#' },
     { id: 'fl-support', label: 'Support Center', href: '#' },
-    { id: 'fl-status', label: 'System Status', href: '#' },
-    { id: 'fl-changelog', label: 'Changelog', href: '#' },
   ],
   Company: [
     { id: 'fl-about', label: 'About Us', href: '#' },
-    { id: 'fl-careers', label: 'Careers', href: '#' },
-    { id: 'fl-partners', label: 'Partners', href: '#' },
     { id: 'fl-contact', label: 'Contact', href: '#contact' },
-    { id: 'fl-press', label: 'Press Kit', href: '#' },
+    { id: 'fl-privacy', label: 'Privacy', href: '#' },
   ],
 };
 
 const legalLinks = [
   { id: 'legal-privacy', label: 'Privacy Policy' },
   { id: 'legal-terms', label: 'Terms of Service' },
-  { id: 'legal-cookies', label: 'Cookie Policy' },
 ];
 </script>

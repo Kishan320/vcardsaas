@@ -1,12 +1,25 @@
 <template>
-  <section class="py-20 bg-white">
+  <section id="how-it-works" class="py-20 bg-white">
     <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-16">
-        <span class="text-sm font-semibold text-primary-600 uppercase tracking-wider">Simple Process</span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2">Create Your vCard in 3 Steps</h2>
-        <p class="text-gray-500 mt-3 max-w-lg mx-auto">From sign-up to sharing your digital card — it takes less than 10 minutes.</p>
+        <span v-if="data?.badge || data?.announcement_text" class="text-sm font-semibold text-primary-600 uppercase tracking-wider">{{ data.badge || data.announcement_text || 'Simple Process' }}</span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2">{{ data?.title || 'Create Your vCard in 3 Steps' }}</h2>
+        <p class="text-gray-500 mt-3 max-w-lg mx-auto">{{ data?.subtitle || data?.description || 'From sign-up to sharing your digital card — it takes less than 10 minutes.' }}</p>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+
+      <!-- Feature Grid Style (if data from settings is used) -->
+      <div v-if="data?.reasons" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div v-for="(reason, idx) in data.reasons" :key="idx" class="relative bg-white rounded-3xl p-8 shadow-card border border-gray-100 card-hover">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6">
+              <component :is="getIcon(reason.icon)" :size="28" />
+            </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">{{ reason.title }}</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">{{ reason.description }}</p>
+        </div>
+      </div>
+
+      <!-- Default Steps Style -->
+      <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
         <div class="hidden md:block absolute top-16 left-1/3 right-1/3 h-0.5 bg-gradient-to-r from-primary-200 to-primary-200" style="z-index: 0;" />
         <div v-for="(step, idx) in steps" :key="step.id" class="relative bg-white rounded-3xl p-8 shadow-card border border-gray-100 card-hover">
           <div class="flex items-center justify-between mb-6">
@@ -33,7 +46,27 @@
 </template>
 
 <script setup lang="ts">
-import { UserPlus, Palette, Share2, ArrowRight } from 'lucide-vue-next';
+import { 
+  UserPlus, Palette, Share2, ArrowRight, Zap, CreditCard, Globe, Smartphone, 
+  BarChart3, Shield, Link2, QrCode, Layout, Users, MessageSquare, Megaphone, 
+  HelpCircle, Mail, Phone, Info, Star, Search, Code, Monitor, CheckCircle2 
+} from 'lucide-vue-next';
+
+const props = defineProps<{
+  data?: any;
+}>();
+
+const icons: Record<string, any> = {
+  UserPlus, Palette, Share2, ArrowRight, Zap, CreditCard, Globe, Smartphone, 
+  BarChart3, Shield, Link2, QrCode, Layout, Users, MessageSquare, Megaphone, 
+  HelpCircle, Mail, Phone, Info, Star, Search, Code, Monitor, CheckCircle2
+};
+
+const getIcon = (name: string) => {
+  if (!name) return Info;
+  if (typeof name !== 'string') return name;
+  return icons[name] || icons[name.charAt(0).toUpperCase() + name.slice(1)] || Info;
+};
 
 const steps = [
   { id: 'step-1', number: '01', icon: UserPlus, title: 'Sign Up & Choose a Template', description: 'Create your free account in seconds. Browse our library of 34+ professional templates and pick the one that fits your brand.', color: 'from-blue-500 to-primary-600', bg: 'bg-blue-50', iconColor: 'text-blue-600', highlights: ['No credit card required', '34+ industry templates', 'Instant account setup'] },

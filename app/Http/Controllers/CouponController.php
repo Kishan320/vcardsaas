@@ -204,11 +204,7 @@ class CouponController extends BaseController
             'status' => !$coupon->status
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => __('Coupon status updated successfully!'),
-            'status' => $coupon->status
-        ]);
+        return redirect()->back()->with('success', __('Coupon status updated successfully!'));
     }
 
     /**
