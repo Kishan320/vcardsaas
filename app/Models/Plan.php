@@ -186,6 +186,11 @@ class Plan extends Model
             'pwa_support' => false,
             'ai_integration' => false,
             'password_protection' => false,
+            'custom_css' => false,
+            'google_wallet' => false,
+            'vcard_builder' => false,
+            'broadcast_email' => false,
+            'bio_link' => false,
             
             // Business Template Sections
             'business_template_sections' => [

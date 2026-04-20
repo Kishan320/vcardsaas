@@ -468,7 +468,7 @@ Route::middleware(['auth', 'verified','setting'])->group(function () {
 
         // Campaigns routes
         Route::middleware('permission:manage-campaigns')->group(function () {
-            Route::get('campaigns', [CampaignsController::class, 'index'])->middleware('permission:manage-campaigns')->name('campaigns.index');
+            Route::get('campaigns', [CampaignsController::class, 'index'])->name('campaigns.index');
             Route::post('campaigns', [CampaignsController::class, 'store'])->middleware('permission:create-campaigns')->name('campaigns.store');
             Route::put('campaigns/{campaign}', [CampaignsController::class, 'update'])->middleware('permission:edit-campaigns')->name('campaigns.update');
             Route::delete('campaigns/{campaign}', [CampaignsController::class, 'destroy'])->middleware('permission:delete-campaigns')->name('campaigns.destroy');
@@ -482,8 +482,8 @@ Route::middleware(['auth', 'verified','setting'])->group(function () {
         Route::post('campaigns/bank-payment', [CampaignsController::class, 'bankPayment'])->name('campaigns.bank.payment');
         // Campaign Settings routes (Super Admin only)
         Route::middleware('App\Http\Middleware\SuperAdminMiddleware')->group(function () {
-            Route::get('campaigns/settings', [CampaignsController::class, 'settings'])->middleware('permission:manage-settings-campaigns')->name('campaigns.settings');
-            Route::post('campaigns/settings', [CampaignsController::class, 'settings'])->middleware('permission:manage-settings-campaigns')->name('campaigns.settings.update');
+            Route::get('campaigns/settings', [CampaignsController::class, 'settings'])->name('campaigns.settings');
+            Route::post('campaigns/settings', [CampaignsController::class, 'settings'])->name('campaigns.settings.update');
         });
 
         // Currencies routes

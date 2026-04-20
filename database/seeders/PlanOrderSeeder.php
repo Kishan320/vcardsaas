@@ -22,20 +22,22 @@ class PlanOrderSeeder extends Seeder
 
         foreach ($users as $index => $user) {
             $plan = $plans->random();
-            $coupon = $index % 3 === 0 ? $coupons->random() : null;
-            
+            $coupon = ($index % 3 === 0 && $coupons->isNotEmpty()) ? $coupons->random() : null;
+            $billingCycle = ['monthly', 'yearly'][array_rand(['monthly', 'yearly'])];
+
             $planOrder = new \App\Models\PlanOrder();
             $planOrder->user_id = $user->id;
             $planOrder->plan_id = $plan->id;
-            $planOrder->calculatePrices($plan->price, $coupon);
+            $planOrder->payment_method = ['stripe', 'paypal', 'bank', 'free'][array_rand(['stripe', 'paypal', 'bank', 'free'])];
+            $planOrder->calculatePrices($plan, $coupon, $billingCycle);
             $planOrder->status = ['pending', 'approved', 'rejected'][array_rand(['pending', 'approved', 'rejected'])];
             $planOrder->ordered_at = now()->subDays(rand(1, 30));
-            
+
             if ($planOrder->status !== 'pending') {
-                $planOrder->processed_at = $planOrder->ordered_at->addHours(rand(1, 48));
+                $planOrder->processed_at = now()->subDays(rand(1, 29));
                 $planOrder->processed_by = \App\Models\User::where('type', 'superadmin')->first()?->id;
             }
-            
+
             $planOrder->save();
         }
     }

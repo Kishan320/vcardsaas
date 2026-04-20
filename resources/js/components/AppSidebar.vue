@@ -24,12 +24,12 @@
                 <div v-else class="border-t border-gray-100 my-2 mx-1" />
                 <template v-for="item in navItemsByGroup(group)" :key="item.id">
                     <!-- Item with children (collapsible) -->
-                    <div v-if="canShow(item) && item.children">
+                    <div v-if="canShow(item) && item.children && visibleChildren(item.children).length > 0">
                         <button
                             @click="toggleOpen(item.id)"
                             class="w-full flex items-center gap-3 px-3 py-2 rounded-lg mb-0.5 text-sm font-medium transition-all duration-150 relative group"
                             :class="[
-                                isGroupActive(item.children)
+                                isGroupActive(visibleChildren(item.children))
                                     ? 'bg-primary-50 text-primary-600'
                                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
                                 collapsed ? 'justify-center' : '',
@@ -37,7 +37,7 @@
                         >
                             <span
                                 class="flex-shrink-0"
-                                :class="isGroupActive(item.children) ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-600'"
+                                :class="isGroupActive(visibleChildren(item.children)) ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-600'"
                             >
                                 <component :is="item.icon" :size="18" />
                             </span>
@@ -48,7 +48,6 @@
                                 class="flex-shrink-0 transition-transform duration-200"
                                 :class="openItems.has(item.id) ? 'rotate-180' : ''"
                             />
-                            <!-- Tooltip when collapsed -->
                             <div
                                 v-if="collapsed"
                                 class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50"
@@ -60,7 +59,7 @@
                         <!-- Children -->
                         <div v-if="!collapsed && openItems.has(item.id)" class="ml-4 pl-3 border-l border-gray-100 mt-0.5 mb-1 space-y-0.5">
                             <Link
-                                v-for="child in item.children" :key="child.href"
+                                v-for="child in visibleChildren(item.children)" :key="child.href"
                                 :href="child.href"
                                 :target="child.target"
                                 class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150"
@@ -74,7 +73,7 @@
                     </div>
                     <!-- Regular flat item -->
                     <Link
-                        v-else-if="canShow(item)"
+                        v-else-if="canShow(item) && !item.children && item.href"
                         :href="item.href"
                         class="flex items-center gap-3 px-3 py-2 rounded-lg mb-0.5 text-sm font-medium transition-all duration-150 relative group"
                         :class="[
@@ -91,7 +90,6 @@
                             <component :is="item.icon" :size="18" />
                         </span>
                         <span v-if="!collapsed" class="flex-1 truncate">{{ item.label }}</span>
-                        <!-- Tooltip when collapsed -->
                         <div
                             v-if="collapsed"
                             class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50"
@@ -124,11 +122,12 @@
 import { computed, ref } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import {
-    LayoutDashboard, CreditCard, Users, Shield, Key, BarChart3,
+    LayoutDashboard, CreditCard, Users, Key, BarChart3,
     Calendar, Phone, Package, DollarSign, Globe, Settings,
     FileText, Link2, Image, Megaphone, ChevronRight, ChevronDown, Layers,
-    UserCheck, Wallet, Building2, BookOpen, ExternalLink,
+    UserCheck, Wallet, Building2, BookOpen, ExternalLink, Gift, Tag, Mail,
 } from 'lucide-vue-next';
+import { usePermissions } from '@/composables/usePermissions';
 import type { PageProps } from '@/types';
 
 const props = defineProps<{
@@ -144,14 +143,14 @@ const initials = computed(() => {
     return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
 });
 
-const isSuperAdmin = computed(() =>
-    !!(user.value?.is_super_admin || user.value?.type === 'superadmin' || user.value?.type === 'super admin'),
-);
+const { isSuperAdmin, hasPermission } = usePermissions();
 
 interface NavChild {
     label: string;
     href: string;
     target?: string;
+    permission?: string;
+    superAdminOnly?: boolean;
 }
 
 interface NavItem {
@@ -161,86 +160,110 @@ interface NavItem {
     href?: string;
     group: string;
     superAdminOnly?: boolean;
+    companyOnly?: boolean;
     permission?: string;
     children?: NavChild[];
 }
 
 const navItems: NavItem[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard', group: 'Overview' },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3, href: '/analytics', group: 'Overview' },
+    // Superadmin items (image exact match)
+    { id: 'dashboard',  label: 'Dashboard',  icon: LayoutDashboard, href: '/dashboard', group: 'Main' },
+    { id: 'analytics',  label: 'Analytics',  icon: BarChart3, href: '/analytics', group: 'Main' },
+    { id: 'addons',     label: 'Addons',     icon: Package,  href: '/addons', group: 'Main', superAdminOnly: true },
     {
-        id: 'business-directory',
-        label: 'Business Directory',
-        icon: BookOpen,
-        group: 'Overview',
+        id: 'business-directory', label: 'Business Directory', icon: BookOpen, group: 'Main',
         superAdminOnly: true,
         children: [
-            { label: 'View Directory', href: '/directory', target: '_blank' },
+            { label: 'View Directory',     href: '/directory',              target: '_blank' },
             { label: 'Directory Settings', href: '/directory/settings' },
-            { label: 'Custom Pages', href: '/directory/custom-pages' },
+            { label: 'Custom Pages',       href: '/directory/custom-pages' },
         ],
     },
-    { id: 'vcard-builder', label: 'VCard Builder', icon: CreditCard, href: '/vcard-builder', group: 'Cards' },
-    { id: 'link-bio', label: 'Link in Bio', icon: Link2, href: '/link-bio-builder', group: 'Cards' },
+    { id: 'companies',     label: 'Companies',     icon: Building2, href: '/companies',     group: 'Main', superAdminOnly: true },
+    { id: 'media-library', label: 'Media Library', icon: Image,     href: '/media-library', group: 'Main', permission: 'manage-media' },
     {
-        id: 'nfc-cards',
-        label: 'NFC Cards',
-        icon: Layers,
-        group: 'Cards',
+        id: 'nfc-cards', label: 'NFC Cards', icon: Layers, group: 'Main',
         children: [
-            { label: 'NFC Cards', href: '/nfc-cards' },
-            { label: 'Order Requests', href: '/nfc-cards-request' },
-        ],
-    },
-    { id: 'contacts', label: 'Contacts', icon: Phone, href: '/contacts', group: 'CRM' },
-    { id: 'appointments', label: 'Appointments', icon: Calendar, href: '/appointments', group: 'CRM' },
-    { id: 'calendar', label: 'Calendar', icon: Calendar, href: '/calendar', group: 'CRM' },
-    {
-        id: 'campaigns',
-        label: 'Campaigns',
-        icon: Megaphone,
-        group: 'Marketing',
-        children: [
-            { label: 'All Campaigns', href: '/campaigns' },
-            { label: 'Settings', href: '/campaigns/settings' },
+            { label: 'NFC Cards',      href: '/nfc-cards',         permission: 'manage-nfc-cards' },
+            { label: 'Order Requests', href: '/nfc-cards-request', permission: 'manage-nfc-cards' },
         ],
     },
     {
-        id: 'plans',
-        label: 'Plans',
-        icon: Package,
-        group: 'Billing',
+        id: 'campaigns', label: 'Campaigns', icon: Megaphone, group: 'Main',
         children: [
-            { label: 'Plans', href: '/plans' },
-            { label: 'Plan Requests', href: '/plan-requests' },
-            { label: 'Plan Orders', href: '/plan-orders' },
-            { label: 'Coupons', href: '/coupons' },
+            { label: 'Campaigns', href: '/campaigns',          permission: 'manage-campaigns' },
+            { label: 'Settings',  href: '/campaigns/settings', superAdminOnly: true },
         ],
     },
-    { id: 'currencies', label: 'Currencies', icon: DollarSign, href: '/currencies', group: 'Billing' },
-    { id: 'users', label: 'Users', icon: Users, href: '/users', group: 'Admin', superAdminOnly: true },
-    { id: 'companies', label: 'Companies', icon: Building2, href: '/companies', group: 'Admin', superAdminOnly: true },
-    { id: 'roles', label: 'Roles', icon: UserCheck, href: '/roles', group: 'Admin', superAdminOnly: true },
-    { id: 'permissions', label: 'Permissions', icon: Key, href: '/permissions', group: 'Admin', superAdminOnly: true },
-    { id: 'domain-requests', label: 'Domain Requests', icon: Globe, href: '/domain-requests', group: 'Admin', superAdminOnly: true },
-    { id: 'referral', label: 'Referral', icon: Wallet, href: '/referral', group: 'Admin', superAdminOnly: true },
-    { id: 'addons', label: 'Addons', icon: Package, href: '/addons', group: 'Admin', superAdminOnly: true },
-    { id: 'email-templates', label: 'Email Templates', icon: FileText, href: '/email-templates', group: 'Admin', superAdminOnly: true },
-    { id: 'media-library', label: 'Media Library', icon: Image, href: '/media-library', group: 'Tools' },
-    { id: 'google-wallet', label: 'Google Wallet', icon: Wallet, href: '/google-wallet', group: 'Tools' },
-    { id: 'settings', label: 'Settings', icon: Settings, href: '/settings', group: 'System' },
-    { id: 'landing-page', label: 'Landing Page', icon: Globe, href: '/landing-page/settings', group: 'System', superAdminOnly: true },
+    {
+        id: 'plans', label: 'Plans', icon: Package, group: 'Main',
+        children: [
+            { label: 'Plans',         href: '/plans',         permission: 'manage-plans' },
+            { label: 'Plan Requests', href: '/plan-requests', permission: 'manage-plan-requests' },
+            { label: 'Plan Orders',   href: '/plan-orders',   permission: 'manage-plan-orders' },
+            { label: 'Coupons',       href: '/coupons',       superAdminOnly: true },
+        ],
+    },
+    { id: 'domain-requests', label: 'Domain Requests',  icon: Globe,     href: '/domain-requests',       group: 'Main', superAdminOnly: true },
+    { id: 'currencies',      label: 'Currencies',        icon: DollarSign, href: '/currencies',            group: 'Main', superAdminOnly: true },
+    { id: 'referral',        label: 'Referral Program',  icon: Gift,      href: '/referral',              group: 'Main', permission: 'manage-referral' },
+    {
+        id: 'landing-page', label: 'Landing Page', icon: Globe, group: 'Main',
+        superAdminOnly: true,
+        children: [
+            { label: 'Settings',     href: '/landing-page/settings' },
+            { label: 'Custom Pages', href: '/landing-page/custom-pages' },
+        ],
+    },
+    { id: 'broadcast-emails', label: 'Broadcast Emails', icon: Mail,     href: '/campaigns',          group: 'Main', superAdminOnly: true },
+    { id: 'email-templates',  label: 'Email Templates',  icon: FileText, href: '/email-templates',    group: 'Main', superAdminOnly: true },
+    { id: 'settings',         label: 'Settings',         icon: Settings, href: '/settings',           group: 'Main', permission: 'manage-settings' },
+
+    // Company-only items
+    { id: 'vcard-builder', label: 'vCard Builder', icon: CreditCard, href: '/vcard-builder',    group: 'Cards', companyOnly: true, permission: 'manage-businesses' },
+    { id: 'link-bio',      label: 'Bio Link',      icon: Link2,      href: '/link-bio-builder', group: 'Cards', companyOnly: true, permission: 'manage-bio-link-builder' },
+    { id: 'contacts',      label: 'Contacts',      icon: Phone,      href: '/contacts',         group: 'CRM',   companyOnly: true, permission: 'manage-contacts' },
+    { id: 'appointments',  label: 'Appointments',  icon: Calendar,   href: '/appointments',     group: 'CRM',   companyOnly: true, permission: 'manage-appointments' },
+    { id: 'calendar',      label: 'Calendar',      icon: Calendar,   href: '/calendar',         group: 'CRM',   companyOnly: true, permission: 'manage-calendar' },
+    { id: 'google-wallet', label: 'Google Wallet', icon: Wallet,     href: '/google-wallet',    group: 'Tools', companyOnly: true, permission: 'manage-google-wallet' },
+    {
+        id: 'staff', label: 'Staff', icon: Users, group: 'Admin', companyOnly: true,
+        children: [
+            { label: 'Users', href: '/users', permission: 'manage-users' },
+            { label: 'Roles', href: '/roles', permission: 'manage-roles' },
+        ],
+    },
 ];
 
-const allGroups = ['Overview', 'Cards', 'CRM', 'Marketing', 'Billing', 'Admin', 'Tools', 'System'];
+const allGroups = ['Main', 'Cards', 'CRM', 'Tools', 'Admin'];
 
-const canShow = (item: NavItem) => {
+// Check if a nav item should be visible
+const canShow = (item: NavItem): boolean => {
     if (item.superAdminOnly && !isSuperAdmin.value) return false;
+    if (item.companyOnly && isSuperAdmin.value) return false;
+    if (item.permission && !hasPermission(item.permission)) return false;
     return true;
 };
 
+// Filter children based on permissions
+const visibleChildren = (children: NavChild[]): NavChild[] => {
+    return children.filter(child => {
+        if (child.superAdminOnly && !isSuperAdmin.value) return false;
+        if (!child.permission) return true;
+        return hasPermission(child.permission);
+    });
+};
+
 const visibleGroups = computed(() =>
-    allGroups.filter((g) => navItems.some((i) => i.group === g && canShow(i))),
+    allGroups.filter((g) =>
+        navItems.some((i) => {
+            if (i.group !== g) return false;
+            if (!canShow(i)) return false;
+            // For items with children, check if at least one child is visible
+            if (i.children) return visibleChildren(i.children).length > 0;
+            return true;
+        })
+    )
 );
 
 const navItemsByGroup = (group: string) => navItems.filter((i) => i.group === group);
@@ -252,7 +275,6 @@ const isActive = (href: string) =>
 const isGroupActive = (children: NavChild[]) =>
     children.some((c) => isActive(c.href));
 
-// Auto-open groups that have an active child
 const openItems = ref<Set<string>>(new Set(
     navItems
         .filter((i) => i.children && i.children.some((c) => isActive(c.href)))
