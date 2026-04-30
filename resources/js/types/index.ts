@@ -128,3 +128,156 @@ export type PageProps<T extends Record<string, unknown> = Record<string, unknown
         base_url: string;
         image_url: string;
     };
+
+// Additional types from React project
+import type { Component } from 'vue';
+
+export interface NavItem {
+    title: string;
+    href?: string;
+    icon?: Component;
+    permission?: string;
+    children?: NavItem[];
+    target?: string;
+    external?: boolean;
+    defaultOpen?: boolean;
+    order?: number;
+    badge?: {
+        label: string;
+        variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost';
+    };
+}
+
+export interface BreadcrumbItem {
+    title: string;
+    href?: string;
+}
+
+export interface PageAction {
+    label: string;
+    icon: Component;
+    variant: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+    onClick: () => void;
+}
+
+// CRUD types
+export interface EntityConfig {
+    name: string;
+    endpoint: string;
+    permissions: {
+      view: string;
+      create: string;
+      edit: string;
+      delete: string;
+    };
+    breadcrumbs: {
+      title: string;
+      href?: string;
+    }[];
+}
+  
+export interface TableColumn {
+    key: string;
+    label: string;
+    sortable?: boolean;
+    type?: 'text' | 'badge' | 'image' | 'date' | 'currency' | 'boolean' | 'link' | 'custom';
+    className?: string;
+    linkClassName?: string;
+    href?: string | ((row: any) => string);
+    openInNewTab?: boolean;
+    render?: (value: any, row: any) => Component;
+}
+  
+export interface TableAction {
+    label: string;
+    icon: string;
+    action?: string;
+    href?: string | ((row: any) => string);
+    openInNewTab?: boolean;
+    permission?: string;
+    className?: string;
+    requiredPermission?: string;
+    condition?: (row: any, context?: any) => boolean;
+}
+  
+export interface TableConfig {
+    columns: TableColumn[];
+    actions: TableAction[];
+    statusColors?: Record<string, string>;
+}
+  
+export interface FilterOption {
+    value: string;
+    label: string;
+}
+  
+export interface FilterField {
+    key: string;
+    label: string;
+    type: 'select' | 'date' | 'daterange' | 'text' | 'number' | 'boolean';
+    options?: FilterOption[];
+    relation?: {
+      endpoint: string;
+      valueField: string;
+      labelField: string;
+    };
+}
+  
+export interface FileValidation {
+    accept?: string;
+    maxSize?: number;
+    mimeTypes?: string[];
+    extensions?: string[];
+}
+  
+export interface FormField {
+    name: string;
+    label: string;
+    type: 'text' | 'email' | 'password' | 'select' | 'textarea' | 'radio' | 'checkbox' | 'switch' | 'file' | 'date' | 'number' | 'multi-select' | 'media-picker' | 'custom';
+    placeholder?: string;
+    required?: boolean;
+    multiple?: boolean;
+    options?: FilterOption[];
+    relation?: {
+      endpoint: string;
+      valueField: string;
+      labelField: string;
+    };
+    validation?: {
+      pattern?: string;
+      min?: number;
+      max?: number;
+      minLength?: number;
+      maxLength?: number;
+    };
+    fileValidation?: FileValidation;
+    description?: string;
+    colSpan?: number;
+    width?: string;
+    row?: number;
+    render?: (field: FormField, formData: any, onChange: (name: string, value: any) => void) => Component;
+    conditional?: (mode: string, formData: any) => boolean;
+}
+  
+export interface FormConfig {
+    fields: FormField[];
+    modalSize?: string;
+    columns?: number;
+    layout?: 'grid' | 'flex' | 'default';
+}
+  
+export interface CrudHooks {
+    afterCreate?: (data: any, response: any) => void;
+    afterUpdate?: (data: any, response: any) => void;
+    afterDelete?: (id: any) => void;
+}
+  
+export interface CrudConfig {
+    entity: EntityConfig;
+    table: TableConfig;
+    filters: FilterField[];
+    form: FormConfig;
+    hooks?: CrudHooks;
+    modalSize?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | 'full';
+    description?: string;
+}

@@ -516,6 +516,14 @@ Route::middleware(['auth', 'verified','setting'])->group(function () {
                 'destroy' => 'landing-page.custom-pages.destroy'
             ]);
             
+            // Landing Page Contacts management
+            Route::get('landing-page/contacts', [\App\Http\Controllers\LandingPage\ContactController::class, 'index'])->name('landing-page.contacts.index');
+            Route::delete('landing-page/contacts/{contact}', [\App\Http\Controllers\LandingPage\ContactController::class, 'destroy'])->name('landing-page.contacts.destroy');
+            
+            // Landing Page Newsletters management
+            Route::get('landing-page/newsletters', [\App\Http\Controllers\LandingPage\NewsletterController::class, 'index'])->name('landing-page.newsletters.index');
+            Route::delete('landing-page/newsletters/{newsletter}', [\App\Http\Controllers\LandingPage\NewsletterController::class, 'destroy'])->name('landing-page.newsletters.destroy');
+            
             // API routes for slug validation
             Route::post('api/landing-page/custom-pages/check-slug', [CustomPageController::class, 'checkSlug'])->name('api.custom-pages.check-slug');
             Route::post('api/landing-page/custom-pages/generate-slug', [CustomPageController::class, 'generateSlug'])->name('api.custom-pages.generate-slug');

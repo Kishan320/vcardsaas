@@ -211,8 +211,10 @@ const navItems: NavItem[] = [
         id: 'landing-page', label: 'Landing Page', icon: Globe, group: 'Main',
         superAdminOnly: true,
         children: [
-            { label: 'Settings',     href: '/landing-page/settings' },
-            { label: 'Custom Pages', href: '/landing-page/custom-pages' },
+            { label: 'Landing Page',     href: '/landing-page' },
+            { label: 'Custom Pages',     href: '/landing-page/custom-pages' },
+            { label: 'Contact Queries', href: '/landing-page/contacts' },
+            { label: 'Newsletter',      href: '/landing-page/newsletters' },
         ],
     },
     { id: 'broadcast-emails', label: 'Broadcast Emails', icon: Mail,     href: '/campaigns',          group: 'Main', superAdminOnly: true },

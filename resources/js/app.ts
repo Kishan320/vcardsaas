@@ -1,12 +1,39 @@
 import '../css/app.css';
+import '../css/dark-mode.css';
 import './bootstrap';
 import { createInertiaApp, router } from '@inertiajs/vue3';
-import { createApp, h, type DefineComponent } from 'vue';
+import { createApp, h, type DefineComponent, Suspense } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import { createI18n } from 'vue-i18n';
 import { initializeGlobalSettings } from './utils/globalSettings';
+import { initializeTheme } from './composables/useAppearance';
+import { initPerformanceMonitoring, lazyLoadImages } from './utils/performance';
+import { useBrand } from './contexts/BrandContext';
+import pinia from './stores';
+import { useGlobalStore } from './stores/globalStore';
+import './i18n';
+import './utils/axios-config';
 
-const appName = import.meta.env.VITE_APP_NAME || 'VCard SaaS';
+// Initialize performance monitoring
+initPerformanceMonitoring();
+
+// Initialize lazy loading of images when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    lazyLoadImages();
+});
+
+// Add event listener for theme changes
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    const savedTheme = localStorage.getItem('themeSettings');
+    if (savedTheme) {
+        const themeSettings = JSON.parse(savedTheme);
+        if (themeSettings.appearance === 'system') {
+            initializeTheme();
+        }
+    }
+});
+
+const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 const i18n = createI18n({
     legacy: false,
@@ -67,37 +94,127 @@ function resolvePage(name: string) {
 
 createInertiaApp({
     title: (title) => {
-        const globalSettings = (window as any).appSettings;
-        const customTitle = globalSettings?.get?.('titleText') || appName;
+        const globalSettings = (window as any).page?.props?.globalSettings;
+        const customTitle = globalSettings?.titleText || appName;
         return title ? `${title} - ${customTitle}` : customTitle;
     },
     resolve: resolvePage,
     setup({ el, App, props, plugin }) {
-        // Initialize global settings from shared Inertia props
-        const globalSettings = (props.initialPage.props as any).globalSettings || {};
+        // Make page data globally available for axios interceptor
+        try {
+            (window as any).page = props.initialPage;
+        } catch (e) {
+            console.warn('Could not set global page data:', e);
+        }
+        
+        // Set demo mode globally
+        try {
+            (window as any).isDemo = props.initialPage.props?.is_demo || false;
+        } catch (e) {
+            // Ignore errors
+        }
+        
+        // Initialize global settings from shared data
+        const globalSettings = props.initialPage.props.globalSettings || {};
         if (Object.keys(globalSettings).length > 0) {
             initializeGlobalSettings(globalSettings);
+            
+            // Set initial document title
+            if (globalSettings.titleText) {
+                document.title = globalSettings.titleText;
+            }
         }
+        
+        // Always initialize theme with available settings
+        initializeTheme(globalSettings);
 
-        // Set demo mode globally (mirrors React project)
-        (window as any).isDemo = (props.initialPage.props as any).is_demo || false;
+        // Initialize brand settings
+        const user = props.initialPage.props.auth?.user;
+        const { initializeBrandSettings } = useBrand();
+        initializeBrandSettings(globalSettings, user);
 
-        createApp({ render: () => h(App, props) })
+        const vueApp = createApp({
+            render: () => h(Suspense, {}, {
+                default: () => h(App, props),
+                fallback: () => h('div', { class: 'flex h-screen w-full items-center justify-center' }, 'Loading...')
+            })
+        });
+
+        vueApp
             .use(plugin)
             .use(ZiggyVue)
             .use(i18n)
+            .use(pinia)
             .mount(el);
 
-        // Re-initialize global settings on every navigation (mirrors React project)
+        // Initialize Pinia store after Pinia is installed
+        const globalStore = useGlobalStore();
+        globalStore.setGlobalSettings(globalSettings);
+        globalStore.setUser(user);
+        globalStore.setDemoMode(props.initialPage.props?.is_demo || false);
+
+        // Update global page data on navigation and re-render with new settings
         router.on('navigate', (event) => {
-            const updatedSettings = (event.detail.page.props as any).globalSettings || {};
-            if (Object.keys(updatedSettings).length > 0) {
-                initializeGlobalSettings(updatedSettings);
+            try {
+                (window as any).page = event.detail.page;
+                
+                // Re-initialize global settings with updated data
+                const updatedGlobalSettings = event.detail.page.props.globalSettings || {};
+                if (Object.keys(updatedGlobalSettings).length > 0) {
+                    initializeGlobalSettings(updatedGlobalSettings);
+                    
+                    // Update document title if titleText changed
+                    if (updatedGlobalSettings.titleText) {
+                        document.title = updatedGlobalSettings.titleText;
+                    }
+                }
+                
+                // Re-initialize brand settings
+                const updatedUser = event.detail.page.props.auth?.user;
+                initializeBrandSettings(updatedGlobalSettings, updatedUser);
+                
+                // Update Pinia store
+                const globalStore = useGlobalStore();
+                globalStore.setGlobalSettings(updatedGlobalSettings);
+                globalStore.setUser(updatedUser);
+                globalStore.setDemoMode(event.detail.page.props?.is_demo || false);
+                
+                // Force dark mode check on navigation
+                const savedTheme = localStorage.getItem('themeSettings');
+                if (savedTheme) {
+                    const themeSettings = JSON.parse(savedTheme);
+                    const isDark = themeSettings.appearance === 'dark' || 
+                        (themeSettings.appearance === 'system' && 
+                         window.matchMedia('(prefers-color-scheme: dark)').matches);
+                    document.documentElement.classList.toggle('dark', isDark);
+                    document.body.classList.toggle('dark', isDark);
+                }
+            } catch (e) {
+                console.error('Navigation error:', e);
             }
-            (window as any).isDemo = (event.detail.page.props as any).is_demo || false;
         });
     },
     progress: {
-        color: '#7C3AED',
+        color: '#4B5563',
     },
 });
+
+// Fallback theme initialization if no global settings are available
+if (typeof window !== 'undefined') {
+    const hasGlobalSettings = window.appSettings || document.querySelector('meta[name="global-settings"]');
+    if (!hasGlobalSettings) {
+        initializeTheme();
+    }
+}
+
+// Initialize direction from localStorage if available
+const initializeDirection = () => {
+    const savedDirection = localStorage.getItem('layoutDirection');
+    if (savedDirection) {
+        document.documentElement.dir = savedDirection;
+        document.documentElement.setAttribute('dir', savedDirection);
+    }
+};
+
+// Initialize direction on page load
+initializeDirection();

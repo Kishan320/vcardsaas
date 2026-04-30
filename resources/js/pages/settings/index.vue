@@ -1,213 +1,364 @@
 <template>
-    <AppLayout>
-        <Head title="Settings" />
-        <FlashMessage />
-        <div class="space-y-6">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Settings</h1>
-                <p class="text-sm text-gray-500 mt-0.5">Manage your application settings</p>
-            </div>
+  <AppLayout>
+    <Head title="Settings" />
+    <FlashMessage />
+    <div class="space-y-6">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">{{ t('Settings') }}</h1>
+        <p class="text-sm text-gray-500 mt-0.5">{{ t('Manage your application settings') }}</p>
+      </div>
 
-            <div class="flex flex-col lg:flex-row gap-6">
-                <!-- Sidebar -->
-                <div class="lg:w-56 flex-shrink-0">
-                    <nav class="bg-white border border-gray-100 rounded-2xl shadow-card p-2 space-y-0.5">
-                        <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
-                            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
-                            :class="activeTab === tab.id ? 'bg-primary-50 text-primary-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'">
-                            <component :is="tab.icon" :size="16" :class="activeTab === tab.id ? 'text-primary-600' : 'text-gray-400'" />
-                            {{ tab.label }}
-                        </button>
-                    </nav>
-                </div>
-
-                <!-- Content -->
-                <div class="flex-1">
-                    <!-- System Settings -->
-                    <div v-if="activeTab === 'system'" class="bg-white border border-gray-100 rounded-2xl shadow-card p-6">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-5">System Settings</h2>
-                        <form @submit.prevent="saveSystem" class="space-y-4">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <InputLabel value="App Name" />
-                                    <TextInput v-model="systemForm.app_name" type="text" class="mt-1.5" placeholder="VCard SaaS" />
-                                </div>
-                                <div>
-                                    <InputLabel value="App URL" />
-                                    <TextInput v-model="systemForm.app_url" type="url" class="mt-1.5" placeholder="https://example.com" />
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <input type="checkbox" v-model="systemForm.registration_enabled" id="reg" class="rounded border-gray-300 text-primary-600" />
-                                <label for="reg" class="text-sm text-gray-700">Allow new user registrations</label>
-                            </div>
-                            <div class="flex justify-end">
-                                <PrimaryButton :disabled="saving">
-                                    <Loader2 v-if="saving" :size="14" class="mr-1 animate-spin" />
-                                    Save Settings
-                                </PrimaryButton>
-                            </div>
-                        </form>
-                    </div>
-
-                    <!-- Email Settings -->
-                    <div v-if="activeTab === 'email'" class="bg-white border border-gray-100 rounded-2xl shadow-card p-6">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-5">Email Settings</h2>
-                        <form @submit.prevent="saveEmail" class="space-y-4">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <InputLabel value="Mail Driver" />
-                                    <select v-model="emailForm.mail_mailer" class="mt-1.5 w-full rounded-xl border border-[hsl(var(--border))] bg-white px-4 py-2.5 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200">
-                                        <option value="smtp">SMTP</option>
-                                        <option value="mailgun">Mailgun</option>
-                                        <option value="ses">Amazon SES</option>
-                                        <option value="log">Log (Testing)</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <InputLabel value="Mail Host" />
-                                    <TextInput v-model="emailForm.mail_host" type="text" class="mt-1.5" placeholder="smtp.mailtrap.io" />
-                                </div>
-                                <div>
-                                    <InputLabel value="Mail Port" />
-                                    <TextInput v-model="emailForm.mail_port" type="number" class="mt-1.5" placeholder="587" />
-                                </div>
-                                <div>
-                                    <InputLabel value="Mail Username" />
-                                    <TextInput v-model="emailForm.mail_username" type="text" class="mt-1.5" />
-                                </div>
-                                <div>
-                                    <InputLabel value="Mail Password" />
-                                    <TextInput v-model="emailForm.mail_password" type="password" class="mt-1.5" />
-                                </div>
-                                <div>
-                                    <InputLabel value="From Address" />
-                                    <TextInput v-model="emailForm.mail_from_address" type="email" class="mt-1.5" placeholder="noreply@example.com" />
-                                </div>
-                            </div>
-                            <div class="flex justify-end">
-                                <PrimaryButton :disabled="saving">
-                                    <Loader2 v-if="saving" :size="14" class="mr-1 animate-spin" />
-                                    Save Email Settings
-                                </PrimaryButton>
-                            </div>
-                        </form>
-                    </div>
-
-                    <!-- Payment Settings -->
-                    <div v-if="activeTab === 'payment'" class="bg-white border border-gray-100 rounded-2xl shadow-card p-6">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-5">Payment Settings</h2>
-                        <form @submit.prevent="savePayment" class="space-y-4">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <InputLabel value="Stripe Public Key" />
-                                    <TextInput v-model="paymentForm.stripe_key" type="text" class="mt-1.5" placeholder="pk_..." />
-                                </div>
-                                <div>
-                                    <InputLabel value="Stripe Secret Key" />
-                                    <TextInput v-model="paymentForm.stripe_secret" type="password" class="mt-1.5" placeholder="sk_..." />
-                                </div>
-                                <div>
-                                    <InputLabel value="PayPal Client ID" />
-                                    <TextInput v-model="paymentForm.paypal_client_id" type="text" class="mt-1.5" />
-                                </div>
-                                <div>
-                                    <InputLabel value="PayPal Secret" />
-                                    <TextInput v-model="paymentForm.paypal_secret" type="password" class="mt-1.5" />
-                                </div>
-                            </div>
-                            <div class="flex justify-end">
-                                <PrimaryButton :disabled="saving">
-                                    <Loader2 v-if="saving" :size="14" class="mr-1 animate-spin" />
-                                    Save Payment Settings
-                                </PrimaryButton>
-                            </div>
-                        </form>
-                    </div>
-
-                    <!-- SEO Settings -->
-                    <div v-if="activeTab === 'seo'" class="bg-white border border-gray-100 rounded-2xl shadow-card p-6">
-                        <h2 class="text-lg font-semibold text-gray-900 mb-5">SEO Settings</h2>
-                        <form @submit.prevent="saveSeo" class="space-y-4">
-                            <div>
-                                <InputLabel value="Site Title" />
-                                <TextInput v-model="seoForm.site_title" type="text" class="mt-1.5" />
-                            </div>
-                            <div>
-                                <InputLabel value="Meta Description" />
-                                <textarea v-model="seoForm.meta_description" rows="3"
-                                    class="mt-1.5 w-full rounded-xl border border-[hsl(var(--border))] bg-white px-4 py-2.5 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 resize-none" />
-                            </div>
-                            <div class="flex justify-end">
-                                <PrimaryButton :disabled="saving">
-                                    <Loader2 v-if="saving" :size="14" class="mr-1 animate-spin" />
-                                    Save SEO Settings
-                                </PrimaryButton>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
+      <div class="flex flex-col md:flex-row gap-8">
+        <!-- Sidebar Navigation -->
+        <div class="md:w-64 flex-shrink-0">
+          <div class="sticky top-20">
+            <ScrollArea class="h-[calc(100vh-5rem)]">
+              <div class="space-y-1 pr-4">
+                <Button
+                  v-for="item in sidebarNavItems"
+                  :key="item.href"
+                  variant="ghost"
+                  class="w-full justify-start"
+                  :class="{ 'bg-muted font-medium': activeSection === item.href.replace('#', '') }"
+                  @click="handleNavClick(item.href)"
+                >
+                  <component :is="item.icon" class="h-4 w-4 mr-2" />
+                  {{ item.title }}
+                </Button>
+              </div>
+            </ScrollArea>
+          </div>
         </div>
-    </AppLayout>
+
+        <!-- Main Content -->
+        <div class="flex-1">
+          <!-- System Settings Section -->
+          <section id="system-settings" ref="systemSettingsRef" class="mb-8">
+            <SystemSettings
+              :settings="systemSettings"
+              :timezones="timezones"
+              :dateFormats="dateFormats"
+              :timeFormats="timeFormats"
+            />
+          </section>
+
+          <!-- Brand Settings Section -->
+          <section id="brand-settings" ref="brandSettingsRef" class="mb-8">
+            <BrandSettings />
+          </section>
+
+          <!-- Currency Settings Section -->
+          <section id="currency-settings" ref="currencySettingsRef" class="mb-8">
+            <CurrencySettings />
+          </section>
+
+          <!-- Email Settings Section -->
+          <section id="email-settings" ref="emailSettingsRef" class="mb-8">
+            <EmailSettings />
+          </section>
+
+          <!-- Payment Settings Section -->
+          <section id="payment-settings" ref="paymentSettingsRef" class="mb-8">
+            <PaymentSettings :settings="paymentSettings" />
+          </section>
+
+          <!-- Storage Settings Section -->
+          <section id="storage-settings" ref="storageSettingsRef" class="mb-8">
+            <StorageSettings :settings="systemSettings" />
+          </section>
+
+          <!-- ReCaptcha Settings Section -->
+          <section id="recaptcha-settings" ref="recaptchaSettingsRef" class="mb-8">
+            <RecaptchaSettings :settings="systemSettings" />
+          </section>
+
+          <!-- Chat GPT Settings Section -->
+          <section id="chatgpt-settings" ref="chatgptSettingsRef" class="mb-8">
+            <ChatGptSettings :settings="systemSettings" />
+          </section>
+
+          <!-- Cookie Settings Section -->
+          <section id="cookie-settings" ref="cookieSettingsRef" class="mb-8">
+            <CookieSettings :settings="systemSettings" />
+          </section>
+
+          <!-- SEO Settings Section -->
+          <section id="seo-settings" ref="seoSettingsRef" class="mb-8">
+            <SeoSettings :settings="systemSettings" />
+          </section>
+
+          <!-- Cache Settings Section -->
+          <section id="cache-settings" ref="cacheSettingsRef" class="mb-8">
+            <CacheSettings :cache-size="cacheSize" />
+          </section>
+
+          <!-- Google Calendar Settings Section -->
+          <section id="google-calendar-settings" ref="googleCalendarSettingsRef" class="mb-8">
+            <GoogleCalendarSettings :settings="systemSettings" />
+          </section>
+
+          <!-- Google Wallet Settings Section -->
+          <section id="google-wallet-settings" ref="googleWalletSettingsRef" class="mb-8">
+            <GoogleWalletSettings :settings="systemSettings" />
+          </section>
+
+          <!-- Webhook Settings Section -->
+          <section id="webhook-settings" ref="webhookSettingsRef" class="mb-8">
+            <WebhookSettings :webhooks="webhooks" />
+          </section>
+        </div>
+      </div>
+    </div>
+  </AppLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { Head, router } from '@inertiajs/vue3';
-import { Settings, Mail, CreditCard, Globe, Loader2 } from 'lucide-vue-next';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { Head, usePage } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
+import {
+  Settings as SettingsIcon,
+  Building,
+  DollarSign,
+  Users,
+  RefreshCw,
+  Palette,
+  BookOpen,
+  Award,
+  FileText,
+  Mail,
+  Bell,
+  Link2,
+  CreditCard,
+  Calendar,
+  HardDrive,
+  Shield,
+  Bot,
+  Cookie,
+  Search,
+  Webhook,
+  Wallet
+} from 'lucide-vue-next';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import AppLayout from '@/layouts/AppLayout.vue';
 import FlashMessage from '@/components/ui/FlashMessage.vue';
-import InputLabel from '@/components/ui/InputLabel.vue';
-import TextInput from '@/components/ui/TextInput.vue';
-import PrimaryButton from '@/components/ui/PrimaryButton.vue';
+import SystemSettings from './components/SystemSettings.vue';
+import BrandSettings from './components/BrandSettings.vue';
+import CurrencySettings from './components/CurrencySettings.vue';
+import EmailSettings from './components/EmailSettings.vue';
+import PaymentSettings from './components/PaymentSettings.vue';
+import StorageSettings from './components/StorageSettings.vue';
+import RecaptchaSettings from './components/RecaptchaSettings.vue';
+import ChatGptSettings from './components/ChatGptSettings.vue';
+import CookieSettings from './components/CookieSettings.vue';
+import SeoSettings from './components/SeoSettings.vue';
+import CacheSettings from './components/CacheSettings.vue';
+import GoogleCalendarSettings from './components/GoogleCalendarSettings.vue';
+import GoogleWalletSettings from './components/GoogleWalletSettings.vue';
+import WebhookSettings from './components/WebhookSettings.vue';
 
-const props = defineProps<{ settings?: Record<string, string> }>();
+const { t } = useI18n();
+const page = usePage();
+const { systemSettings = {}, cacheSize = '0.00', timezones = {}, dateFormats = {}, timeFormats = {}, paymentSettings = {}, webhooks = [], auth = {} } = page.props as any;
 
-const activeTab = ref('system');
-const saving = ref(false);
+const activeSection = ref('system-settings');
+const isManualNavigation = ref(false);
 
-const tabs = [
-    { id: 'system', label: 'System', icon: Settings },
-    { id: 'email', label: 'Email', icon: Mail },
-    { id: 'payment', label: 'Payment', icon: CreditCard },
-    { id: 'seo', label: 'SEO', icon: Globe },
+// Refs for each section
+const systemSettingsRef = ref<HTMLElement | null>(null);
+const brandSettingsRef = ref<HTMLElement | null>(null);
+const currencySettingsRef = ref<HTMLElement | null>(null);
+const emailSettingsRef = ref<HTMLElement | null>(null);
+const paymentSettingsRef = ref<HTMLElement | null>(null);
+const storageSettingsRef = ref<HTMLElement | null>(null);
+const recaptchaSettingsRef = ref<HTMLElement | null>(null);
+const chatgptSettingsRef = ref<HTMLElement | null>(null);
+const cookieSettingsRef = ref<HTMLElement | null>(null);
+const seoSettingsRef = ref<HTMLElement | null>(null);
+const cacheSettingsRef = ref<HTMLElement | null>(null);
+const webhookSettingsRef = ref<HTMLElement | null>(null);
+const googleCalendarSettingsRef = ref<HTMLElement | null>(null);
+const googleWalletSettingsRef = ref<HTMLElement | null>(null);
+
+// Define all possible sidebar navigation items
+const allSidebarNavItems = [
+  {
+    title: t('System Settings'),
+    href: '#system-settings',
+    icon: SettingsIcon,
+    permission: 'manage-system-settings'
+  },
+  {
+    title: t('Brand Settings'),
+    href: '#brand-settings',
+    icon: Palette,
+    permission: 'manage-brand-settings'
+  },
+  {
+    title: t('Currency Settings'),
+    href: '#currency-settings',
+    icon: DollarSign,
+    permission: 'manage-currency-settings'
+  },
+  {
+    title: t('Email Settings'),
+    href: '#email-settings',
+    icon: Mail,
+    permission: 'manage-email-settings'
+  },
+  {
+    title: t('Payment Settings'),
+    href: '#payment-settings',
+    icon: CreditCard,
+    permission: 'manage-payment-settings'
+  },
+  {
+    title: t('Storage Settings'),
+    href: '#storage-settings',
+    icon: HardDrive,
+    permission: 'manage-storage-settings'
+  },
+  {
+    title: t('ReCaptcha Settings'),
+    href: '#recaptcha-settings',
+    icon: Shield,
+    permission: 'manage-recaptcha-settings'
+  },
+  {
+    title: t('Chat GPT Settings'),
+    href: '#chatgpt-settings',
+    icon: Bot,
+    permission: 'manage-chatgpt-settings'
+  },
+  {
+    title: t('Cookie Settings'),
+    href: '#cookie-settings',
+    icon: Cookie,
+    permission: 'manage-cookie-settings'
+  },
+  {
+    title: t('SEO Settings'),
+    href: '#seo-settings',
+    icon: Search,
+    permission: 'manage-seo-settings'
+  },
+  {
+    title: t('Cache Settings'),
+    href: '#cache-settings',
+    icon: HardDrive,
+    permission: 'manage-cache-settings'
+  },
+  {
+    title: t('Google Calendar Settings'),
+    href: '#google-calendar-settings',
+    icon: Calendar,
+    permission: 'settings'
+  },
+  {
+    title: t('Google Wallet Settings'),
+    href: '#google-wallet-settings',
+    icon: Wallet,
+    permission: 'settings'
+  },
+  {
+    title: t('Webhook Settings'),
+    href: '#webhook-settings',
+    icon: Webhook,
+    permission: 'manage-webhook-settings'
+  }
 ];
 
-const systemForm = ref({
-    app_name: props.settings?.app_name ?? '',
-    app_url: props.settings?.app_url ?? '',
-    registration_enabled: props.settings?.registration_enabled === '1',
+// Filter sidebar items based on user permissions
+const sidebarNavItems = allSidebarNavItems.filter(item => {
+  // If no permission is required or user has the permission
+  if (!item.permission || (auth.permissions && auth.permissions.includes(item.permission))) {
+    return true;
+  }
+  // For company users, only show specific settings
+  if (auth.user && auth.user.type === 'company') {
+    return ['manage-system-settings', 'manage-email-settings', 'manage-brand-settings', 'manage-webhook-settings', 'settings'].includes(item.permission);
+  }
+  return false;
 });
 
-const emailForm = ref({
-    mail_mailer: props.settings?.mail_mailer ?? 'smtp',
-    mail_host: props.settings?.mail_host ?? '',
-    mail_port: props.settings?.mail_port ?? '587',
-    mail_username: props.settings?.mail_username ?? '',
-    mail_password: '',
-    mail_from_address: props.settings?.mail_from_address ?? '',
-});
+// Smart scroll functionality
+const handleScroll = () => {
+  const scrollPosition = window.scrollY + 100;
 
-const paymentForm = ref({
-    stripe_key: props.settings?.stripe_key ?? '',
-    stripe_secret: '',
-    paypal_client_id: props.settings?.paypal_client_id ?? '',
-    paypal_secret: '',
-});
+  // Get all section elements that are currently rendered
+  const sections = [
+    { id: 'system-settings', ref: systemSettingsRef },
+    { id: 'brand-settings', ref: brandSettingsRef },
+    { id: 'currency-settings', ref: currencySettingsRef },
+    { id: 'email-settings', ref: emailSettingsRef },
+    { id: 'payment-settings', ref: paymentSettingsRef },
+    { id: 'storage-settings', ref: storageSettingsRef },
+    { id: 'recaptcha-settings', ref: recaptchaSettingsRef },
+    { id: 'chatgpt-settings', ref: chatgptSettingsRef },
+    { id: 'cookie-settings', ref: cookieSettingsRef },
+    { id: 'seo-settings', ref: seoSettingsRef },
+    { id: 'cache-settings', ref: cacheSettingsRef },
+    { id: 'google-calendar-settings', ref: googleCalendarSettingsRef },
+    { id: 'google-wallet-settings', ref: googleWalletSettingsRef },
+    { id: 'webhook-settings', ref: webhookSettingsRef }
+  ].filter(section => section.ref.value);
 
-const seoForm = ref({
-    site_title: props.settings?.site_title ?? '',
-    meta_description: props.settings?.meta_description ?? '',
-});
+  // Find the active section
+  let activeId = sections[0]?.id || 'system-settings';
 
-const post = (url: string, data: any) => {
-    saving.value = true;
-    router.post(url, data, { onFinish: () => { saving.value = false; } });
+  for (const section of sections) {
+    const element = section.ref.value;
+    if (element) {
+      const rect = element.getBoundingClientRect();
+      const elementTop = window.scrollY + rect.top;
+
+      if (scrollPosition >= elementTop) {
+        activeId = section.id;
+      }
+    }
+  }
+
+  // Only update if not manually navigating
+  if (!isManualNavigation.value) {
+    activeSection.value = activeId;
+  }
 };
 
-const saveSystem = () => post(route('settings.system.update'), systemForm.value);
-const saveEmail = () => post(route('settings.email.update'), emailForm.value);
-const savePayment = () => post(route('settings.payment.update'), paymentForm.value);
-const saveSeo = () => post(route('settings.seo.update'), seoForm.value);
+// Handle navigation click
+const handleNavClick = (href: string) => {
+  const id = href.replace('#', '');
+  isManualNavigation.value = true;
+  activeSection.value = id;
+  const element = document.getElementById(id);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth' });
+  }
+  setTimeout(() => {
+    isManualNavigation.value = false;
+  }, 150);
+};
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll);
+
+  // Initial check
+  handleScroll();
+
+  // Check for hash in URL
+  const hash = window.location.hash.replace('#', '');
+  if (hash) {
+    setTimeout(() => {
+      const element = document.getElementById(hash);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+        activeSection.value = hash;
+      }
+    }, 100);
+  }
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
+});
 </script>

@@ -1,6 +1,6 @@
-import { type ThemeColor } from '@/hooks/use-appearance';
+import { type ThemeColor } from '@/composables/useAppearance';
 import { type LayoutPosition } from '@/contexts/LayoutContext';
-import { type Appearance } from '@/hooks/use-appearance';
+import { type Appearance } from '@/composables/useAppearance';
 
 // Define the brand settings interface
 export interface BrandSettings {
