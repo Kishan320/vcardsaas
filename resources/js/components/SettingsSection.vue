@@ -8,7 +8,7 @@
             {{ description }}
           </CardDescription>
         </div>
-        <div v-if="action">
+        <div v-if="$slots.action || action">
           <slot name="action">{{ action }}</slot>
         </div>
       </div>
