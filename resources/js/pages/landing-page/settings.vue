@@ -69,7 +69,7 @@
                         <span class="text-sm font-semibold text-gray-700">Section Visibility</span>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" v-model="form.config_sections.section_visibility[activeSection]" class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all" :style="form.config_sections.section_visibility[activeSection] ? { backgroundColor: primaryColor } : { backgroundColor: '#d1d5db' }"></div>
                         </label>
                     </div>
                 </div>
@@ -234,7 +234,7 @@
                                         <div v-else-if="typeof val === 'boolean'" class="mt-1">
                                             <label class="relative inline-flex items-center cursor-pointer">
                                                 <input type="checkbox" v-model="sectionData[key]" class="sr-only peer">
-                                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all" :style="sectionData[key] ? { backgroundColor: primaryColor } : { backgroundColor: '#d1d5db' }"></div>
                                             </label>
                                         </div>
 
@@ -309,10 +309,18 @@ import FlashMessage from '@/components/ui/FlashMessage.vue';
 import InputLabel from '@/components/ui/InputLabel.vue';
 import TextInput from '@/components/ui/TextInput.vue';
 import PrimaryButton from '@/components/ui/PrimaryButton.vue';
+import { useBrand } from '@/contexts/BrandContext';
+import { THEME_COLORS } from '@/composables/useAppearance';
 
 const props = defineProps<{
     settings: any;
 }>();
+
+const { themeColor, customColor } = useBrand();
+const primaryColor = computed(() => {
+    const color = themeColor.value;
+    return color === 'custom' ? customColor.value : (THEME_COLORS[color as keyof typeof THEME_COLORS] || THEME_COLORS.green);
+});
 
 const saving = ref(false);
 const activeSection = ref('general');

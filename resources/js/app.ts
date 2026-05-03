@@ -125,7 +125,10 @@ createInertiaApp({
             }
         }
         
-        // Always initialize theme with available settings
+        // Always initialize theme from DB settings — remove stale localStorage
+        if (typeof localStorage !== 'undefined') {
+            localStorage.removeItem('themeSettings');
+        }
         initializeTheme(globalSettings);
 
         // Initialize brand settings

@@ -3,6 +3,12 @@
     :title="t('Brand Settings')"
     :description="t('Customize your application\'s branding and appearance')"
   >
+    <template #action>
+      <Button type="button" @click="saveSettings" :disabled="saving">
+        <Loader2 v-if="saving" :size="14" class="mr-1 animate-spin" />
+        {{ saving ? t('Saving...') : t('Save Changes') }}
+      </Button>
+    </template>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="lg:col-span-2">
         <div class="flex space-x-2 mb-6">
@@ -50,7 +56,13 @@
                     <span class="text-xs">{{ logoErrors.logoDark ? t('Failed to load image') : t('No logo selected') }}</span>
                   </div>
                 </div>
-                <Input v-model="brandSettings.logoDark" :placeholder="t('Enter dark mode logo URL')" />
+                <MediaPicker
+                  label=""
+                  :value="brandSettings.logoDark"
+                  :onChange="(url) => handleMediaSelect('logoDark', url as string)"
+                  placeholder="Select dark mode logo..."
+                  :show-preview="false"
+                />
               </div>
             </div>
 
@@ -66,7 +78,13 @@
                     <span class="text-xs">{{ logoErrors.logoLight ? t('Failed to load image') : t('No logo selected') }}</span>
                   </div>
                 </div>
-                <Input v-model="brandSettings.logoLight" :placeholder="t('Enter light mode logo URL')" />
+                <MediaPicker
+                  label=""
+                  :value="brandSettings.logoLight"
+                  :onChange="(url) => handleMediaSelect('logoLight', url as string)"
+                  placeholder="Select light mode logo..."
+                  :show-preview="false"
+                />
               </div>
             </div>
 
@@ -82,7 +100,13 @@
                     <span class="text-xs">{{ logoErrors.favicon ? t('Failed to load image') : t('No favicon selected') }}</span>
                   </div>
                 </div>
-                <Input v-model="brandSettings.favicon" :placeholder="t('Enter favicon URL')" />
+                <MediaPicker
+                  label=""
+                  :value="brandSettings.favicon"
+                  :onChange="(url) => handleMediaSelect('favicon', url as string)"
+                  placeholder="Select favicon..."
+                  :show-preview="false"
+                />
               </div>
             </div>
           </div>
@@ -319,18 +343,11 @@
         </div>
       </div>
     </div>
-
-    <div class="flex justify-end pt-6">
-      <Button type="button" @click="saveSettings" :disabled="saving">
-        <Loader2 v-if="saving" :size="14" class="mr-1 animate-spin" />
-        {{ saving ? t('Saving...') : t('Save Changes') }}
-      </Button>
-    </div>
   </SettingsSection>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { ref, reactive, watch } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { Button } from '@/components/ui/button';
@@ -338,6 +355,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Palette, Upload, Check, Layout, Moon, FileText, Sidebar as SidebarIcon } from 'lucide-vue-next';
 import SettingsSection from '@/components/SettingsSection.vue';
+import MediaPicker from '@/components/MediaPicker.vue';
+import { useBrand } from '@/contexts/BrandContext';
 
 const { t } = useI18n();
 const page = usePage();
@@ -374,6 +393,24 @@ const brandSettings = reactive({
   themeMode: globalSettings.themeMode || defaultSettings.themeMode
 });
 
+const { updateBrandSettings } = useBrand();
+
+// Live apply on every change — no save needed
+watch(() => brandSettings.themeColor, (color) => {
+  updateBrandSettings({ themeColor: color as any, customColor: brandSettings.customColor });
+});
+watch(() => brandSettings.customColor, (color) => {
+  if (brandSettings.themeColor === 'custom') {
+    updateBrandSettings({ themeColor: 'custom', customColor: color });
+  }
+});
+watch(() => brandSettings.themeMode, (mode) => {
+  updateBrandSettings({ themeMode: mode as any });
+});
+watch(() => ({ logoDark: brandSettings.logoDark, logoLight: brandSettings.logoLight, favicon: brandSettings.favicon }), (logos) => {
+  updateBrandSettings(logos);
+}, { deep: true });
+
 const logoErrors = reactive({
   logoDark: false,
   logoLight: false,
@@ -401,6 +438,19 @@ const getDisplayUrl = (path: string): string => {
     return `${(window as any).appSettings?.baseUrl || ''}${path}`;
   }
   return path.startsWith('/') ? `${(window as any).appSettings?.baseUrl || ''}${path}` : path;
+};
+
+const convertToRelativePath = (url: string): string => {
+  if (!url) return url;
+  if (!url.startsWith('http')) return url;
+  const storageIndex = url.indexOf('/storage/');
+  if (storageIndex !== -1) return url.substring(storageIndex);
+  return url;
+};
+
+const handleMediaSelect = (field: 'logoDark' | 'logoLight' | 'favicon', url: string) => {
+  logoErrors[field] = false;
+  brandSettings[field] = convertToRelativePath(url);
 };
 
 const saveSettings = () => {

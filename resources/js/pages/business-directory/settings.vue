@@ -384,6 +384,8 @@
 <script setup lang="ts">
 import { ref, computed, reactive } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { useBrand } from '@/contexts/BrandContext';
+import { THEME_COLORS } from '@/composables/useAppearance';
 import { Eye, Save, Loader2, Type, Info, Palette, Settings as SettingsIcon, ArrowUpDown, GripVertical, Plus, Trash2, Image as ImageIcon } from 'lucide-vue-next';
 import PageTemplate from '@/components/page-template.vue';
 import MediaPicker from '@/components/MediaPicker.vue';
@@ -406,7 +408,7 @@ const sectionNames: Record<string, string> = {
 };
 
 const defaultConfig = {
-    theme: { primary_color: '#7C3AED', secondary_color: '#3b82f6', accent_color: '#8b5cf6' },
+    theme: { primary_color: '#10b981', secondary_color: '#3b82f6', accent_color: '#8b5cf6' },
     company: { name: '', contact_email: '', contact_phone: '', contact_address: '' },
     hero: {
         trust_badge: 'Trusted by 10,000+ Businesses',
@@ -452,7 +454,11 @@ const form = reactive({
     },
 });
 
-const primaryColor = computed(() => form.config_sections.theme.primary_color || '#7C3AED');
+const { themeColor, customColor } = useBrand();
+const primaryColor = computed(() => {
+    const color = themeColor.value;
+    return color === 'custom' ? customColor.value : (THEME_COLORS[color as keyof typeof THEME_COLORS] || THEME_COLORS.green);
+});
 
 const sectionOrder = computed(() => {
     const defaults = ['hero', 'search', 'categories', 'filters', 'businesses'];

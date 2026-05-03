@@ -1,145 +1,139 @@
-/* Dark mode styles for landing page settings */
+/* Dark mode — overrides for components that use hardcoded Tailwind color classes */
 
-/* Base styles for dark mode */
+/* ── Backgrounds ─────────────────────────────────────────────── */
 .dark body {
-  background-color: #111827;
-  color: #f3f4f6;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
 }
 
-/* Card and container styles */
 .dark .bg-white {
-  background-color: #1f2937;
+  background-color: hsl(var(--card)) !important;
 }
 
-.dark .border-gray-200 {
-  border-color: #374151;
+.dark .bg-gray-50 {
+  background-color: hsl(222 47% 13%) !important;
 }
 
-.dark .shadow-sm {
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+.dark .bg-gray-100 {
+  background-color: hsl(222 47% 16%) !important;
 }
 
-/* Text styles */
-.dark .text-gray-900 {
-  color: #f3f4f6;
+/* ── Borders ─────────────────────────────────────────────────── */
+.dark .border-gray-100,
+.dark .border-gray-200,
+.dark .border-gray-300 {
+  border-color: hsl(var(--border)) !important;
 }
 
-.dark .text-gray-700 {
-  color: #d1d5db;
+/* ── Text ────────────────────────────────────────────────────── */
+.dark .text-gray-900 { color: hsl(213 31% 91%) !important; }
+.dark .text-gray-800 { color: hsl(213 31% 85%) !important; }
+.dark .text-gray-700 { color: hsl(215 20% 75%) !important; }
+.dark .text-gray-600 { color: hsl(215 20% 65%) !important; }
+.dark .text-gray-500 { color: hsl(215 20% 55%) !important; }
+.dark .text-gray-400 { color: hsl(215 20% 45%) !important; }
+
+/* ── Sidebar ─────────────────────────────────────────────────── */
+.dark aside,
+.dark .sidebar-transition {
+  background-color: hsl(var(--card)) !important;
+  border-color: hsl(var(--border)) !important;
 }
 
-.dark .text-gray-600 {
-  color: #9ca3af;
+.dark .hover\:bg-gray-50:hover {
+  background-color: hsl(222 47% 18%) !important;
 }
 
-.dark .text-gray-500 {
-  color: #6b7280;
+.dark .hover\:bg-gray-100:hover {
+  background-color: hsl(222 47% 20%) !important;
 }
 
-/* Form elements */
-.dark input,
+/* ── Topbar ──────────────────────────────────────────────────── */
+.dark header,
+.dark .topbar {
+  background-color: hsl(var(--card)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+/* ── Cards & Panels ──────────────────────────────────────────── */
+.dark .rounded-xl,
+.dark .rounded-2xl,
+.dark .rounded-lg {
+  border-color: hsl(var(--border));
+}
+
+.dark .shadow-card {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.3);
+}
+
+/* ── Form inputs ─────────────────────────────────────────────── */
+.dark input:not([type="color"]):not([type="checkbox"]):not([type="radio"]),
 .dark textarea,
 .dark select {
-  background-color: #111827;
-  border-color: #4b5563;
-  color: #f3f4f6;
+  background-color: hsl(var(--input)) !important;
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 .dark input::placeholder,
 .dark textarea::placeholder {
-  color: #6b7280;
+  color: hsl(var(--muted-foreground)) !important;
 }
 
 .dark input:focus,
 .dark textarea:focus,
 .dark select:focus {
-  border-color: var(--theme-color);
-  box-shadow: 0 0 0 2px rgba(var(--theme-color-rgb), 0.2);
+  border-color: var(--theme-color) !important;
+  outline: none;
 }
 
-/* Button styles */
-.dark .btn-outline,
-.dark button[variant="outline"] {
-  border-color: #4b5563;
-  color: #d1d5db;
+/* ── Buttons (outline variant) ───────────────────────────────── */
+.dark .border-input {
+  border-color: hsl(var(--border)) !important;
 }
 
-.dark .btn-outline:hover,
-.dark button[variant="outline"]:hover {
-  background-color: #374151;
+.dark .bg-background {
+  background-color: hsl(var(--background)) !important;
 }
 
-/* Icon backgrounds */
-.dark .bg-blue-100 {
-  background-color: rgba(59, 130, 246, 0.2);
+/* ── Dividers ────────────────────────────────────────────────── */
+.dark .divide-gray-50 > * + *,
+.dark .divide-gray-100 > * + * {
+  border-color: hsl(var(--border)) !important;
 }
 
-.dark .bg-green-100 {
-  background-color: rgba(16, 185, 129, 0.2);
+/* ── Tables ──────────────────────────────────────────────────── */
+.dark thead {
+  background-color: hsl(222 47% 16%) !important;
 }
 
-.dark .bg-purple-100 {
-  background-color: rgba(139, 92, 246, 0.2);
+.dark tbody tr:hover {
+  background-color: hsl(222 47% 16%) !important;
 }
 
-.dark .bg-orange-100 {
-  background-color: rgba(249, 115, 22, 0.2);
+/* ── Modals ──────────────────────────────────────────────────── */
+.dark [role="dialog"] > div {
+  background-color: hsl(var(--card)) !important;
+  border-color: hsl(var(--border)) !important;
 }
 
-.dark .bg-red-100 {
-  background-color: rgba(239, 68, 68, 0.2);
+/* ── Dropdowns ───────────────────────────────────────────────── */
+.dark [role="menu"] {
+  background-color: hsl(var(--card)) !important;
+  border-color: hsl(var(--border)) !important;
 }
 
-.dark .bg-gray-50 {
-  background-color: #1f2937;
+/* ── Switch toggle unchecked ─────────────────────────────────── */
+.dark .bg-gray-300 {
+  background-color: hsl(216 34% 28%) !important;
 }
 
-/* Icon colors */
-.dark .text-blue-600 {
-  color: #60a5fa;
+/* ── Muted backgrounds ───────────────────────────────────────── */
+.dark .bg-muted\/30 {
+  background-color: hsl(var(--muted) / 0.3) !important;
 }
 
-.dark .text-green-600 {
-  color: #34d399;
-}
-
-.dark .text-purple-600 {
-  color: #a78bfa;
-}
-
-.dark .text-orange-600 {
-  color: #fb923c;
-}
-
-.dark .text-red-600 {
-  color: #f87171;
-}
-
-/* Preview sections */
-.dark .preview-section {
-  background-color: #1f2937;
-  border-color: #374151;
-}
-
-.dark .preview-content {
-  background-color: #111827;
-}
-
-/* Switch component */
-.dark .switch {
-  background-color: #4b5563;
-}
-
-.dark .switch[aria-checked="true"] {
-  background-color: var(--theme-color);
-}
-
-/* Progress bar */
-.dark .progress-bg {
-  background-color: #374151;
-}
-
-/* Separator */
-.dark .separator {
-  background-color: #374151;
+/* ── Scrollbar ───────────────────────────────────────────────── */
+.dark .scrollbar-thin {
+  scrollbar-color: hsl(var(--border)) transparent;
 }

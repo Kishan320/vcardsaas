@@ -1,4 +1,4 @@
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { getBrandSettings, type BrandSettings } from '@/utils/brandSettings';
 import { initializeTheme } from '@/composables/useAppearance';
 
@@ -17,65 +17,67 @@ const brandSettings = ref<BrandSettings>({
 });
 
 const globalSettings = ref<any>(null);
-const user = ref<any>(null);
+const currentUser = ref<any>(null);
+
+// Derived reactive refs for individual brand properties
+export const logoDark = computed(() => brandSettings.value.logoDark);
+export const logoLight = computed(() => brandSettings.value.logoLight);
+export const favicon = computed(() => brandSettings.value.favicon);
+export const titleText = computed(() => brandSettings.value.titleText);
+export const footerText = computed(() => brandSettings.value.footerText);
+export const themeColor = computed(() => brandSettings.value.themeColor);
+export const customColor = computed(() => brandSettings.value.customColor);
+export const sidebarVariant = computed(() => brandSettings.value.sidebarVariant);
+export const sidebarStyle = computed(() => brandSettings.value.sidebarStyle);
+export const layoutDirection = computed(() => brandSettings.value.layoutDirection);
+export const themeMode = computed(() => brandSettings.value.themeMode);
 
 export function useBrand() {
-  const getEffectiveSettings = () => {
-    const isPublicRoute = window.location.pathname.includes('/public/') || 
-                         window.location.pathname === '/' || 
-                         window.location.pathname.includes('/auth/');
-    
-    if (isPublicRoute) {
-      return globalSettings.value;
-    }
-    
-    if (user.value?.role === 'company' && user.value?.globalSettings) {
-      return user.value.globalSettings;
-    }
-    
-    return globalSettings.value;
-  };
-
-  const updateBrandSettings = (newSettings: Partial<BrandSettings>) => {
-    brandSettings.value = { ...brandSettings.value, ...newSettings };
-  };
-
   const applyThemeFromSettings = () => {
-    const effectiveSettings = getEffectiveSettings();
-    if (effectiveSettings?.themeMode && typeof window !== 'undefined') {
+    const settings = brandSettings.value;
+    if (settings?.themeMode && typeof window !== 'undefined') {
       const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const isDark = effectiveSettings.themeMode === 'dark' || 
-        (effectiveSettings.themeMode === 'system' && systemDark);
-      
+      const isDark = settings.themeMode === 'dark' ||
+        (settings.themeMode === 'system' && systemDark);
       document.documentElement.classList.toggle('dark', isDark);
       document.body.classList.toggle('dark', isDark);
     }
   };
 
-  const initializeBrandSettings = (settings: any, currentUser: any) => {
+  const updateBrandSettings = (newSettings: Partial<BrandSettings>) => {
+    brandSettings.value = { ...brandSettings.value, ...newSettings };
+    // Apply CSS variables live
+    initializeTheme(brandSettings.value);
+  };
+
+  const initializeBrandSettings = (settings: any, user: any) => {
     globalSettings.value = settings;
-    user.value = currentUser;
-    
-    const effectiveSettings = getEffectiveSettings();
-    const brandSettingsValue = getBrandSettings(effectiveSettings);
-    brandSettings.value = brandSettingsValue;
-    
+    currentUser.value = user;
+    const resolved = getBrandSettings(settings);
+    brandSettings.value = resolved;
     applyThemeFromSettings();
   };
 
-  onMounted(() => {
+  watch(brandSettings, () => {
     applyThemeFromSettings();
-  });
-
-  watch([globalSettings, user], () => {
-    const effectiveSettings = getEffectiveSettings();
-    const updatedSettings = getBrandSettings(effectiveSettings);
-    brandSettings.value = updatedSettings;
-    applyThemeFromSettings();
-  });
+  }, { deep: true });
 
   return {
-    ...brandSettings.value,
+    // Reactive computed refs
+    logoDark,
+    logoLight,
+    favicon,
+    titleText,
+    footerText,
+    themeColor,
+    customColor,
+    sidebarVariant,
+    sidebarStyle,
+    layoutDirection,
+    themeMode,
+    // Full settings ref
+    brandSettings,
+    // Methods
     updateBrandSettings,
     initializeBrandSettings,
   };

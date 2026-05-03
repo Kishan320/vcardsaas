@@ -79,7 +79,7 @@ class SystemSettingsController extends Controller
                 'settings.customColor' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
                 'settings.sidebarVariant' => 'nullable|string|in:inset,floating,minimal',
                 'settings.sidebarStyle' => 'nullable|string|in:plain,colored,gradient',
-                'settings.layoutDirection' => 'nullable|string|in:left,right',
+                'settings.layoutDirection' => 'nullable|string|in:ltr,rtl',
                 'settings.themeMode' => 'nullable|string|in:light,dark,system',
             ]);
 
@@ -94,9 +94,6 @@ class SystemSettingsController extends Controller
             \Cache::forget('user_settings_' . $userId);
             \Cache::forget('global_settings');
             
-            // Force refresh of settings in the response
-            $refreshedSettings = settings($userId);
-
             return redirect()->back()
                 ->with('success', __('Brand settings updated successfully.'))
                 ->with('refreshSettings', true);

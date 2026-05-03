@@ -1,46 +1,46 @@
 <template>
-  <div class="space-y-6">
-    <div class="rounded-lg border p-6">
-      <h3 class="text-lg font-medium mb-4">{{ t('Chat GPT Settings') }}</h3>
-      <p class="text-sm text-neutral-500 dark:text-neutral-400 mb-6">
-        {{ t('Configure OpenAI ChatGPT API for AI features') }}
-      </p>
+  <SettingsSection
+    :title="t('Chat GPT Settings')"
+    :description="t('Configure Chat GPT integration settings for AI-powered features')"
+  >
+    <template #action>
+      <Button type="submit" form="chatgpt-settings-form" size="sm" :disabled="saving">
+        <Loader2 v-if="saving" :size="14" class="mr-2" />
+        {{ saving ? t('Saving...') : t('Save Changes') }}
+      </Button>
+    </template>
 
-      <form @submit.prevent="saveSettings" class="space-y-6">
-        <div class="grid grid-cols-1 gap-4">
-          <div class="grid gap-2">
-            <Label for="apiKey">{{ t('API Key') }}</Label>
-            <Input
-              id="apiKey"
-              v-model="chatgptSettings.apiKey"
-              type="password"
-              placeholder="sk-..."
-            />
-          </div>
-
-          <div class="grid gap-2">
-            <Label for="model">{{ t('Model') }}</Label>
-            <Select v-model="chatgptSettings.model">
-              <SelectTrigger>
-                <SelectValue :placeholder="t('Select model')" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="gpt-4">GPT-4</SelectItem>
-                <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+    <form id="chatgpt-settings-form" @submit.prevent="saveSettings" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid gap-2 md:col-span-2">
+          <Label for="chatgptKey">{{ t('Chat GPT Key') }}</Label>
+          <Input
+            id="chatgptKey"
+            v-model="chatgptSettings.chatgptKey"
+            type="password"
+            :placeholder="t('Enter your OpenAI API key')"
+          />
         </div>
 
-        <div class="flex justify-end">
-          <Button type="submit" :disabled="saving">
-            <Loader2 v-if="saving" :size="14" class="mr-1 animate-spin" />
-            {{ t('Save Changes') }}
-          </Button>
+        <div class="grid gap-2">
+          <Label for="chatgptModel">{{ t('Chat GPT Model Name') }}</Label>
+          <Select v-model="chatgptSettings.chatgptModel">
+            <SelectTrigger>
+              <SelectValue :placeholder="t('Select Chat GPT model')" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+              <SelectItem value="gpt-3.5-turbo-16k">GPT-3.5 Turbo 16K</SelectItem>
+              <SelectItem value="gpt-4">GPT-4</SelectItem>
+              <SelectItem value="gpt-4-turbo">GPT-4 Turbo</SelectItem>
+              <SelectItem value="gpt-4o">GPT-4o</SelectItem>
+              <SelectItem value="gpt-4o-mini">GPT-4o Mini</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-      </form>
-    </div>
-  </div>
+      </div>
+    </form>
+  </SettingsSection>
 </template>
 
 <script setup lang="ts">
@@ -52,22 +52,26 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-vue-next';
+import SettingsSection from '@/components/SettingsSection.vue';
+
+const props = defineProps<{ settings?: Record<string, string> }>();
 
 const { t } = useI18n();
 const page = usePage();
 const saving = ref(false);
 
+const settingsData = props.settings || (page.props.systemSettings as Record<string, any> || {});
+
 const chatgptSettings = reactive({
-  apiKey: page.props.settings?.chatgpt_api_key || '',
-  model: page.props.settings?.chatgpt_model || 'gpt-3.5-turbo'
+  chatgptKey: settingsData.chatgptKey || '',
+  chatgptModel: settingsData.chatgptModel || 'gpt-3.5-turbo',
 });
 
 const saveSettings = () => {
   saving.value = true;
   router.post(route('settings.chatgpt.update'), chatgptSettings, {
-    onFinish: () => {
-      saving.value = false;
-    }
+    preserveScroll: true,
+    onFinish: () => { saving.value = false; }
   });
 };
 </script>

@@ -92,6 +92,7 @@ const events = computed(() => props.appointments.map(a => ({
 const calendarOptions = computed(() => ({
     plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
     initialView: 'dayGridMonth',
+    firstDay: (window as any).appSettings?.get?.('calendarStartDay') === 'monday' ? 1 : 0,
     headerToolbar: {
         left: 'prev,next today',
         center: 'title',

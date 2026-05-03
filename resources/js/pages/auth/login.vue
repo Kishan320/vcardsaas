@@ -90,7 +90,7 @@
             </PrimaryButton>
         </Form>
 
-        <p class="mt-6 text-center text-sm text-[hsl(var(--muted-foreground))]">
+        <p v-if="registrationEnabled" class="mt-6 text-center text-sm text-[hsl(var(--muted-foreground))]">
             Don't have an account?
             <Link :href="route('register')" class="font-semibold text-primary-600 hover:text-primary-700 transition-colors">
                 Create one
@@ -101,7 +101,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { Form, Field, ErrorMessage } from 'vee-validate';
 import * as yup from 'yup';
 import { Mail, Lock, Eye, EyeOff, Loader2, CheckCircle } from 'lucide-vue-next';
@@ -112,7 +112,11 @@ import TextInput from '@/components/ui/TextInput.vue';
 import PrimaryButton from '@/components/ui/PrimaryButton.vue';
 import Checkbox from '@/components/ui/Checkbox.vue';
 
-defineProps<{ canResetPassword?: boolean; status?: string }>();
+const props = defineProps<{ canResetPassword?: boolean; status?: string }>();
+
+const page = usePage();
+const settings = (page.props as any).settings || {};
+const registrationEnabled = settings.registrationEnabled === 'true' || settings.registrationEnabled === true || settings.registrationEnabled === '1' || settings.registrationEnabled === 1;
 
 const showPassword = ref(false);
 

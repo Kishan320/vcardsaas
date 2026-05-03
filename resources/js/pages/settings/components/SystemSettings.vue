@@ -3,6 +3,12 @@
     :title="t('System Settings')"
     :description="t('Configure system-wide settings for your application')"
   >
+    <template #action>
+      <Button type="submit" form="system-settings-form" size="sm" :disabled="saving">
+        <Loader2 v-if="saving" :size="14" class="mr-2" />
+        {{ saving ? t('Saving...') : t('Save Changes') }}
+      </Button>
+    </template>
     <form id="system-settings-form" @submit.prevent="submitSystemSettings" class="space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="grid gap-2">
@@ -104,11 +110,11 @@
         </div>
 
         <template v-if="isSuperAdmin">
-          <div class="grid gap-2 md:col-span-2">
-            <div class="flex items-center justify-between">
-              <div class="space-y-0.5">
-                <Label for="emailVerification">{{ t('Email Verification') }}</Label>
-                <p class="text-sm text-muted-foreground">
+          <div class="md:col-span-2 rounded-lg border p-4">
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex-1 min-w-0">
+                <Label for="emailVerification" class="text-sm font-medium">{{ t('Email Verification') }}</Label>
+                <p class="text-sm text-muted-foreground mt-0.5">
                   {{ t('Require users to verify their email addresses') }}
                 </p>
               </div>
@@ -119,11 +125,11 @@
             </div>
           </div>
 
-          <div class="grid gap-2 md:col-span-2">
-            <div class="flex items-center justify-between">
-              <div class="space-y-0.5">
-                <Label for="landingPageEnabled">{{ t('Landing Page') }}</Label>
-                <p class="text-sm text-muted-foreground">
+          <div class="md:col-span-2 rounded-lg border p-4">
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex-1 min-w-0">
+                <Label for="landingPageEnabled" class="text-sm font-medium">{{ t('Landing Page') }}</Label>
+                <p class="text-sm text-muted-foreground mt-0.5">
                   {{ t('Enable or disable the public landing page') }}
                 </p>
               </div>
@@ -134,11 +140,11 @@
             </div>
           </div>
 
-          <div class="grid gap-2 md:col-span-2">
-            <div class="flex items-center justify-between">
-              <div class="space-y-0.5">
-                <Label for="registrationEnabled">{{ t('User Registration') }}</Label>
-                <p class="text-sm text-muted-foreground">
+          <div class="md:col-span-2 rounded-lg border p-4">
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex-1 min-w-0">
+                <Label for="registrationEnabled" class="text-sm font-medium">{{ t('User Registration') }}</Label>
+                <p class="text-sm text-muted-foreground mt-0.5">
                   {{ t('Allow new users to register accounts') }}
                 </p>
               </div>
@@ -163,19 +169,12 @@
           </div>
         </template>
       </div>
-
-      <div class="flex justify-end pt-2">
-        <Button type="submit" :disabled="saving">
-          <Loader2 v-if="saving" :size="14" class="mr-1 animate-spin" />
-          {{ t('Save Changes') }}
-        </Button>
-      </div>
     </form>
   </SettingsSection>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, watch } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { Button } from '@/components/ui/button';
@@ -214,19 +213,32 @@ const defaultSettings = {
   termsConditionsUrl: ''
 };
 
-const settingsData = (props.settings as Record<string, any> || (page.props.settings as Record<string, any> || {}));
+const getSettingsData = () => {
+  const s = props.settings as Record<string, any>;
+  return (s && Object.keys(s).length > 0) ? s : ((page.props as any).settings || {});
+};
 
-const systemSettings = reactive({
-  defaultLanguage: settingsData.defaultLanguage || defaultSettings.defaultLanguage,
-  dateFormat: settingsData.dateFormat || defaultSettings.dateFormat,
-  timeFormat: settingsData.timeFormat || defaultSettings.timeFormat,
-  calendarStartDay: settingsData.calendarStartDay || defaultSettings.calendarStartDay,
-  defaultTimezone: settingsData.defaultTimezone || defaultSettings.defaultTimezone,
-  emailVerification: settingsData.emailVerification === 'true' || settingsData.emailVerification === true || settingsData.emailVerification === '1' || defaultSettings.emailVerification,
-  landingPageEnabled: settingsData.landingPageEnabled === 'true' || settingsData.landingPageEnabled === true || settingsData.landingPageEnabled === '1' || defaultSettings.landingPageEnabled,
-  registrationEnabled: settingsData.registrationEnabled === 'true' || settingsData.registrationEnabled === true || settingsData.registrationEnabled === '1' || defaultSettings.registrationEnabled,
-  termsConditionsUrl: settingsData.termsConditionsUrl || defaultSettings.termsConditionsUrl
+const buildSettings = (data: Record<string, any>) => ({
+  defaultLanguage: data.defaultLanguage || defaultSettings.defaultLanguage,
+  dateFormat: data.dateFormat || defaultSettings.dateFormat,
+  timeFormat: data.timeFormat || defaultSettings.timeFormat,
+  calendarStartDay: data.calendarStartDay || defaultSettings.calendarStartDay,
+  defaultTimezone: data.defaultTimezone || defaultSettings.defaultTimezone,
+  emailVerification: data.emailVerification === 'true' || data.emailVerification === true || data.emailVerification === '1',
+  landingPageEnabled: data.landingPageEnabled === 'true' || data.landingPageEnabled === true || data.landingPageEnabled === '1' || (data.landingPageEnabled === undefined ? defaultSettings.landingPageEnabled : false),
+  registrationEnabled: data.registrationEnabled === 'true' || data.registrationEnabled === true || data.registrationEnabled === '1' || (data.registrationEnabled === undefined ? defaultSettings.registrationEnabled : false),
+  termsConditionsUrl: data.termsConditionsUrl || defaultSettings.termsConditionsUrl
 });
+
+const systemSettings = reactive(buildSettings(getSettingsData()));
+
+// Mirror React's useEffect - update when settings prop changes
+watch(() => props.settings, (newSettings) => {
+  if (newSettings && Object.keys(newSettings).length > 0) {
+    const updated = buildSettings(newSettings as Record<string, any>);
+    Object.assign(systemSettings, updated);
+  }
+}, { deep: true });
 
 const submitSystemSettings = () => {
   saving.value = true;

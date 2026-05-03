@@ -162,7 +162,8 @@
                         <button
                             type="button"
                             :disabled="uploading"
-                            class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 disabled:opacity-60"
+                            class="inline-flex items-center gap-2 px-5 py-2.5 text-white text-sm font-medium rounded-lg disabled:opacity-60"
+                            :style="{ backgroundColor: primaryColor }"
                         >
                             <Loader2 v-if="uploading" :size="14" class="animate-spin" />
                             <Plus v-else :size="14" />
@@ -226,6 +227,8 @@ import { ref, computed, onMounted } from 'vue';
 import PageTemplate from '@/components/page-template.vue';
 import { Upload, Search, Copy, Download, ImageIcon, Plus, X, Info, MoreHorizontal, HardDrive, Loader2 } from 'lucide-vue-next';
 import { useMediaLibrary, type MediaItem } from '@/composables/useMediaLibrary';
+import { useBrand } from '@/contexts/BrandContext';
+import { THEME_COLORS } from '@/composables/useAppearance';
 
 const {
     filteredMedia, loading, uploading, searchTerm, currentPage, perPage,
@@ -233,6 +236,12 @@ const {
     fetchMedia, uploadFiles, deleteMedia,
     formatSize, formatDate, fileEmoji,
 } = useMediaLibrary();
+
+const { themeColor, customColor } = useBrand();
+const primaryColor = computed(() => {
+    const color = themeColor.value;
+    return color === 'custom' ? customColor.value : (THEME_COLORS[color as keyof typeof THEME_COLORS] || THEME_COLORS.green);
+});
 
 const uploadOpen = ref(false);
 const dragActive = ref(false);

@@ -60,7 +60,7 @@
                                 <td class="px-4 py-3 text-gray-500">{{ page.sort_order }}</td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center justify-end gap-1">
-                                        <button @click="openEdit(page)" class="p-1.5 rounded-lg hover:bg-blue-50 text-blue-500 transition-colors" title="Edit">
+                                        <button @click="openEdit(page)" class="p-1.5 rounded-lg transition-colors" :style="{ color: primaryColor, backgroundColor: primaryColor + '15' }" title="Edit">
                                             <Pencil :size="15" />
                                         </button>
                                         <button @click="handleDelete(page)" class="p-1.5 rounded-lg hover:bg-red-50 text-red-500 transition-colors" title="Delete">
@@ -187,9 +187,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import { Plus, Trash2, Pencil, Search, ExternalLink, Loader2 } from 'lucide-vue-next';
+import { useBrand } from '@/contexts/BrandContext';
+import { THEME_COLORS } from '@/composables/useAppearance';
 import AppLayout from '@/layouts/AppLayout.vue';
 import FlashMessage from '@/components/ui/FlashMessage.vue';
 import Modal from '@/components/ui/Modal.vue';
@@ -198,6 +200,12 @@ import TextInput from '@/components/ui/TextInput.vue';
 import PrimaryButton from '@/components/ui/PrimaryButton.vue';
 
 const props = defineProps<{ pages?: any; filters?: any }>();
+
+const { themeColor, customColor } = useBrand();
+const primaryColor = computed(() => {
+    const color = themeColor.value;
+    return color === 'custom' ? customColor.value : (THEME_COLORS[color as keyof typeof THEME_COLORS] || THEME_COLORS.green);
+});
 
 const showModal = ref(false);
 const showDeleteModal = ref(false);

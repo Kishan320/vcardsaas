@@ -2,23 +2,33 @@
     <div class="flex flex-col h-full min-h-0">
         <!-- Logo -->
         <template v-if="!hideLogo">
-            <div v-if="!collapsed" class="flex items-center gap-2.5 px-4 py-4 border-b border-gray-100">
-                <div class="w-8 h-8 gradient-primary rounded-lg flex items-center justify-center">
-                    <CreditCard :size="16" class="text-white" />
-                </div>
-                <span class="font-bold text-gray-900 text-lg tracking-tight">VCard SaaS</span>
+            <div v-if="!collapsed" class="flex items-center gap-2.5 px-4 py-4 border-b">
+                <template v-if="sidebarLogo">
+                    <img :src="sidebarLogo" :alt="appTitle" class="h-8 max-w-[120px] object-contain" />
+                </template>
+                <template v-else>
+                    <div class="w-8 h-8 gradient-primary rounded-lg flex items-center justify-center">
+                        <CreditCard :size="16" class="text-white" />
+                    </div>
+                    <span class="font-bold text-gray-900 text-lg tracking-tight">{{ appTitle }}</span>
+                </template>
             </div>
-            <div v-else class="flex items-center justify-center py-4 border-b border-gray-100">
-                <div class="w-8 h-8 gradient-primary rounded-lg flex items-center justify-center">
-                    <CreditCard :size="16" class="text-white" />
-                </div>
+            <div v-else class="flex items-center justify-center py-4 border-b">
+                <template v-if="sidebarLogo">
+                    <img :src="sidebarLogo" :alt="appTitle" class="h-8 w-8 object-contain" />
+                </template>
+                <template v-else>
+                    <div class="w-8 h-8 gradient-primary rounded-lg flex items-center justify-center">
+                        <CreditCard :size="16" class="text-white" />
+                    </div>
+                </template>
             </div>
         </template>
 
         <!-- Nav -->
         <nav class="flex-1 min-h-0 overflow-y-auto scrollbar-thin py-3 px-2">
             <div v-for="group in visibleGroups" :key="group" class="mb-4">
-                <p v-if="!collapsed" class="text-[10px] font-semibold uppercase tracking-widest text-gray-400 px-3 mb-1.5">
+                <p v-if="!collapsed" class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 mb-1.5">
                     {{ group }}
                 </p>
                 <div v-else class="border-t border-gray-100 my-2 mx-1" />
@@ -27,18 +37,13 @@
                     <div v-if="canShow(item) && item.children && visibleChildren(item.children).length > 0">
                         <button
                             @click="toggleOpen(item.id)"
+                            @mouseenter="hoveredItem = item.id"
+                            @mouseleave="hoveredItem = null"
                             class="w-full flex items-center gap-3 px-3 py-2 rounded-lg mb-0.5 text-sm font-medium transition-all duration-150 relative group"
-                            :class="[
-                                isGroupActive(visibleChildren(item.children))
-                                    ? 'bg-primary-50 text-primary-600'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-                                collapsed ? 'justify-center' : '',
-                            ]"
+                            :class="[collapsed ? 'justify-center' : '']" 
+                            :style="getItemStyle(item.id, isGroupActive(visibleChildren(item.children)))"
                         >
-                            <span
-                                class="flex-shrink-0"
-                                :class="isGroupActive(visibleChildren(item.children)) ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-600'"
-                            >
+                            <span class="flex-shrink-0">
                                 <component :is="item.icon" :size="18" />
                             </span>
                             <span v-if="!collapsed" class="flex-1 truncate text-left">{{ item.label }}</span>
@@ -57,13 +62,15 @@
                             </div>
                         </button>
                         <!-- Children -->
-                        <div v-if="!collapsed && openItems.has(item.id)" class="ml-4 pl-3 border-l border-gray-100 mt-0.5 mb-1 space-y-0.5">
+                        <div v-if="!collapsed && openItems.has(item.id)" class="ml-4 pl-3 border-l mt-0.5 mb-1 space-y-0.5">
                             <Link
                                 v-for="child in visibleChildren(item.children)" :key="child.href"
                                 :href="child.href"
                                 :target="child.target"
                                 class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150"
-                                :class="isActive(child.href) ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'"
+                                :style="getItemStyle(child.href, isActive(child.href))"
+                                @mouseenter="hoveredItem = child.href"
+                                @mouseleave="hoveredItem = null"
                             >
                                 <ExternalLink v-if="child.target === '_blank'" :size="13" class="flex-shrink-0 opacity-60" />
                                 <span class="w-1.5 h-1.5 rounded-full bg-current opacity-40 flex-shrink-0" v-else />
@@ -76,17 +83,12 @@
                         v-else-if="canShow(item) && !item.children && item.href"
                         :href="item.href"
                         class="flex items-center gap-3 px-3 py-2 rounded-lg mb-0.5 text-sm font-medium transition-all duration-150 relative group"
-                        :class="[
-                            isActive(item.href)
-                                ? 'bg-primary-50 text-primary-600'
-                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-                            collapsed ? 'justify-center' : '',
-                        ]"
+                        :class="[collapsed ? 'justify-center' : '']"
+                        :style="getItemStyle(item.href!, isActive(item.href!))"
+                        @mouseenter="hoveredItem = item.href!"
+                        @mouseleave="hoveredItem = null"
                     >
-                        <span
-                            class="flex-shrink-0"
-                            :class="isActive(item.href) ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-600'"
-                        >
+                        <span class="flex-shrink-0">
                             <component :is="item.icon" :size="18" />
                         </span>
                         <span v-if="!collapsed" class="flex-1 truncate">{{ item.label }}</span>
@@ -103,16 +105,16 @@
         </nav>
 
         <!-- Bottom user -->
-        <div v-if="!collapsed" class="border-t border-gray-100 p-3">
-            <div class="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+        <div v-if="!collapsed" class="border-t p-3">
+            <div class="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-muted cursor-pointer transition-colors">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" :style="{ backgroundColor: primaryColor }">
                     {{ initials }}
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-semibold text-gray-900 truncate">{{ user?.name }}</p>
-                    <p class="text-xs text-gray-400 truncate">{{ user?.email }}</p>
+                    <p class="text-sm font-semibold text-foreground truncate">{{ user?.name }}</p>
+                    <p class="text-xs text-muted-foreground truncate">{{ user?.email }}</p>
                 </div>
-                <ChevronRight :size="14" class="text-gray-400" />
+                <ChevronRight :size="14" class="text-muted-foreground" />
             </div>
         </div>
     </div>
@@ -128,6 +130,8 @@ import {
     UserCheck, Wallet, Building2, BookOpen, ExternalLink, Gift, Tag, Mail,
 } from 'lucide-vue-next';
 import { usePermissions } from '@/composables/usePermissions';
+import { useBrand } from '@/contexts/BrandContext';
+import { THEME_COLORS } from '@/composables/useAppearance';
 import type { PageProps } from '@/types';
 
 const props = defineProps<{
@@ -144,6 +148,44 @@ const initials = computed(() => {
 });
 
 const { isSuperAdmin, hasPermission } = usePermissions();
+const { logoLight, logoDark, titleText, themeColor, customColor } = useBrand();
+
+const primaryColor = computed(() => {
+    const color = themeColor.value;
+    return color === 'custom' ? customColor.value : (THEME_COLORS[color as keyof typeof THEME_COLORS] || THEME_COLORS.green);
+});
+
+const activeStyle = computed(() => ({
+    backgroundColor: primaryColor.value + '18',
+    color: primaryColor.value,
+}));
+
+const hoveredItem = ref<string | null>(null);
+
+const hoverStyle = computed(() => ({
+    backgroundColor: primaryColor.value + '12',
+    color: primaryColor.value,
+}));
+
+function getItemStyle(key: string, isActiveItem: boolean) {
+    if (isActiveItem) return activeStyle.value;
+    if (hoveredItem.value === key) return hoverStyle.value;
+    return {};
+}
+
+function getItemClass(isActiveItem: boolean) {
+    if (isActiveItem || hoveredItem.value) return '';
+    return 'text-muted-foreground';
+}
+
+// Use light logo for sidebar (light mode default)
+const sidebarLogo = computed(() => {
+    const logo = logoLight.value || logoDark.value;
+    if (!logo) return null;
+    if (logo.startsWith('http')) return logo;
+    return `${(window as any).appSettings?.baseUrl || ''}${logo}`;
+});
+const appTitle = computed(() => titleText.value || 'VCard SaaS');
 
 interface NavChild {
     label: string;

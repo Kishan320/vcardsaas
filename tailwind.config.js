@@ -19,18 +19,22 @@ export default {
             },
             colors: {
                 primary: {
-                    DEFAULT: '#7C3AED',
-                    50: '#F5F0FF',
-                    100: '#EDE0FF',
-                    200: '#D9BFFF',
-                    300: '#C49DFF',
-                    400: '#A97CFF',
-                    500: '#8B5CF6',
-                    600: '#7C3AED',
-                    700: '#6D28D9',
-                    800: '#5B21B6',
-                    900: '#4C1D95',
+                    DEFAULT: 'hsl(var(--primary))',
+                    foreground: 'hsl(var(--primary-foreground))',
                 },
+                background: 'hsl(var(--background))',
+                foreground: 'hsl(var(--foreground))',
+                card: {
+                    DEFAULT: 'hsl(var(--card))',
+                    foreground: 'hsl(var(--card-foreground))',
+                },
+                muted: {
+                    DEFAULT: 'hsl(var(--muted))',
+                    foreground: 'hsl(var(--muted-foreground))',
+                },
+                border: 'hsl(var(--border))',
+                input: 'hsl(var(--input))',
+                ring: 'hsl(var(--ring))',
             },
             borderRadius: {
                 DEFAULT: '0.625rem',
@@ -42,7 +46,7 @@ export default {
             },
             boxShadow: {
                 card: '0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)',
-                'card-hover': '0 8px 32px rgba(124, 58, 237, 0.12)',
+                'card-hover': '0 8px 32px hsl(var(--primary) / 0.12)',
                 modal: '0 20px 60px rgba(0,0,0,0.15)',
             },
         },

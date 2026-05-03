@@ -26,7 +26,7 @@
                             </div>
                             <div>
                                 <InputLabel value="Duration" required />
-                                <select v-model="form.duration" class="mt-1.5 w-full rounded-xl border border-[hsl(var(--border))] bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-200">
+                                <select v-model="form.duration" class="mt-1.5 w-full rounded-xl border border-[hsl(var(--border))] bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--theme-color)]/30">
                                     <option value="monthly">Monthly</option>
                                     <option value="yearly">Yearly</option>
                                     <option value="both">Both</option>
@@ -49,7 +49,7 @@
                         <div>
                             <InputLabel value="Description" />
                             <textarea v-model="form.description" rows="3"
-                                class="mt-1.5 w-full rounded-xl border border-[hsl(var(--border))] bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-200 resize-none" />
+                                class="mt-1.5 w-full rounded-xl border border-[hsl(var(--border))] bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--theme-color)]/30 resize-none" />
                         </div>
                     </div>
 
@@ -85,7 +85,7 @@
                         <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Features</h2>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             <label v-for="feat in featureOptions" :key="feat.key" class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" v-model="form.features[feat.key]" class="rounded border-gray-300 text-primary-600" />
+                                <input type="checkbox" v-model="form.features[feat.key]" class="rounded border-gray-300 accent-[var(--theme-color)]" />
                                 <span class="text-sm text-gray-700">{{ feat.label }}</span>
                             </label>
                         </div>
@@ -98,7 +98,7 @@
                             <p class="text-xs text-gray-400 mt-0.5">Select which sections users can access in their business templates. Leave empty to allow all sections.</p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <input v-model="sectionSearch" type="text" placeholder="Search sections..." class="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-200" />
+                            <input v-model="sectionSearch" type="text" placeholder="Search sections..." class="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--theme-color)]/30" />
                             <button type="button" @click="form.features.business_template_sections = []" class="px-3 py-2 text-xs border border-gray-200 rounded-lg hover:bg-gray-50">Clear</button>
                             <button type="button" @click="form.features.business_template_sections = Object.keys(templateSections)" class="px-3 py-2 text-xs border border-gray-200 rounded-lg hover:bg-gray-50">Select All</button>
                             <button type="button" @click="form.features.business_template_sections = []" class="px-3 py-2 text-xs border border-gray-200 rounded-lg hover:bg-gray-50">Unselect All</button>
@@ -106,7 +106,7 @@
                         <div class="border border-gray-100 rounded-xl p-3 max-h-64 overflow-y-auto">
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                 <label v-for="(label, key) in filteredSections" :key="key" class="flex items-center gap-2 cursor-pointer py-1">
-                                    <input type="checkbox" :value="key" v-model="form.features.business_template_sections" class="w-4 h-4 rounded-full border-gray-300 text-primary-600" />
+                                    <input type="checkbox" :value="key" v-model="form.features.business_template_sections" class="w-4 h-4 rounded-full border-gray-300 accent-[var(--theme-color)]" />
                                     <span class="text-sm text-gray-700">{{ label }}</span>
                                 </label>
                             </div>
@@ -121,7 +121,7 @@
                             <p class="text-xs text-gray-400 mt-0.5">Available Business Templates ({{ form.themes.length }}/{{ businessTypeOptions.length }}). Leave empty to allow all templates.</p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <input v-model="themeSearch" type="text" placeholder="Search business themes..." class="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-200" />
+                            <input v-model="themeSearch" type="text" placeholder="Search business themes..." class="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--theme-color)]/30" />
                             <button type="button" @click="form.themes = []" class="px-3 py-2 text-xs border border-gray-200 rounded-lg hover:bg-gray-50">Clear</button>
                             <button type="button" @click="form.themes = businessTypeOptions.map(t => t.value)" class="px-3 py-2 text-xs border border-gray-200 rounded-lg hover:bg-gray-50">Select All</button>
                             <button type="button" @click="form.themes = []" class="px-3 py-2 text-xs border border-gray-200 rounded-lg hover:bg-gray-50">Unselect All</button>
@@ -129,7 +129,7 @@
                         <div class="border border-gray-100 rounded-xl p-3 max-h-64 overflow-y-auto">
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                 <label v-for="t in filteredThemes" :key="t.value" class="flex items-center gap-2 cursor-pointer py-1">
-                                    <input type="checkbox" :value="t.value" v-model="form.themes" class="w-4 h-4 rounded-full border-gray-300 text-primary-600" />
+                                    <input type="checkbox" :value="t.value" v-model="form.themes" class="w-4 h-4 rounded-full border-gray-300 accent-[var(--theme-color)]" />
                                     <span class="text-sm text-gray-700">Theme {{ t.themeNumber }}: {{ t.label }}</span>
                                 </label>
                             </div>
@@ -143,7 +143,7 @@
                             <p class="text-xs text-gray-400 mt-0.5">Available Bio Links Templates ({{ form.bio_links_themes.length }}/{{ bioLinkTypes.length }}). Leave empty to allow all templates.</p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <input v-model="bioSearch" type="text" placeholder="Search bio themes..." class="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-200" />
+                            <input v-model="bioSearch" type="text" placeholder="Search bio themes..." class="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--theme-color)]/30" />
                             <button type="button" @click="form.bio_links_themes = []" class="px-3 py-2 text-xs border border-gray-200 rounded-lg hover:bg-gray-50">Clear</button>
                             <button type="button" @click="form.bio_links_themes = bioLinkTypes.map(t => t.value)" class="px-3 py-2 text-xs border border-gray-200 rounded-lg hover:bg-gray-50">Select All</button>
                             <button type="button" @click="form.bio_links_themes = []" class="px-3 py-2 text-xs border border-gray-200 rounded-lg hover:bg-gray-50">Unselect All</button>
@@ -151,7 +151,7 @@
                         <div class="border border-gray-100 rounded-xl p-3 max-h-64 overflow-y-auto">
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                 <label v-for="(t, i) in filteredBioThemes" :key="t.value" class="flex items-center gap-2 cursor-pointer py-1">
-                                    <input type="checkbox" :value="t.value" v-model="form.bio_links_themes" class="w-4 h-4 rounded-full border-gray-300 text-primary-600" />
+                                    <input type="checkbox" :value="t.value" v-model="form.bio_links_themes" class="w-4 h-4 rounded-full border-gray-300 accent-[var(--theme-color)]" />
                                     <span class="text-sm text-gray-700">Theme {{ i + 1 }}: {{ t.label }}</span>
                                 </label>
                             </div>
@@ -163,7 +163,7 @@
                         <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Trial & Status</h2>
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                             <div class="flex items-center gap-2">
-                                <input type="checkbox" v-model="trialEnabled" id="is_trial" class="rounded border-gray-300 text-primary-600" />
+                                <input type="checkbox" v-model="trialEnabled" id="is_trial" class="rounded border-gray-300 accent-[var(--theme-color)]" />
                                 <label for="is_trial" class="text-sm text-gray-700">Enable Trial</label>
                             </div>
                             <div v-if="trialEnabled">
@@ -171,11 +171,11 @@
                                 <TextInput v-model="form.trial_day" type="number" class="mt-1.5" />
                             </div>
                             <div class="flex items-center gap-2">
-                                <input type="checkbox" v-model="planEnabled" id="is_plan_enable" class="rounded border-gray-300 text-primary-600" />
+                                <input type="checkbox" v-model="planEnabled" id="is_plan_enable" class="rounded border-gray-300 accent-[var(--theme-color)]" />
                                 <label for="is_plan_enable" class="text-sm text-gray-700">Active</label>
                             </div>
                             <div class="flex items-center gap-2">
-                                <input type="checkbox" v-model="form.is_default" id="is_default" class="rounded border-gray-300 text-primary-600" :disabled="otherDefaultPlanExists && !plan.is_default" />
+                                <input type="checkbox" v-model="form.is_default" id="is_default" class="rounded border-gray-300 accent-[var(--theme-color)]" :disabled="otherDefaultPlanExists && !plan.is_default" />
                                 <label for="is_default" class="text-sm text-gray-700">Default Plan</label>
                             </div>
                         </div>

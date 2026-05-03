@@ -118,7 +118,7 @@
                 <Checkbox v-model:checked="form.terms" />
                 <label class="text-sm text-[hsl(var(--muted-foreground))]">
                     I agree to the 
-                    <a href="#" class="text-primary-600 hover:text-primary-700">Terms of Service</a>
+                    <a :href="termsConditionsUrl || '#'" target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:text-primary-700">Terms of Service</a>
                     and 
                     <a href="#" class="text-primary-600 hover:text-primary-700">Privacy Policy</a>
                 </label>
@@ -141,7 +141,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { Form, Field, ErrorMessage } from 'vee-validate';
 import * as yup from 'yup';
 import { Mail, Lock, User, Eye, EyeOff, Loader2 } from 'lucide-vue-next';
@@ -158,6 +158,10 @@ interface RegisterProps {
 }
 
 const props = defineProps<RegisterProps>();
+
+const page = usePage();
+const settings = (page.props as any).settings || {};
+const termsConditionsUrl = settings.termsConditionsUrl || '';
 
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);

@@ -98,11 +98,11 @@
                             </div>
                         </div>
 
-                        <div v-if="!isSuperAdmin && referralLink" class="rounded-lg border border-emerald-200 bg-emerald-50/60 p-5">
-                            <p class="text-base font-bold text-emerald-700">Your Referral Link</p>
+                        <div v-if="!isSuperAdmin && referralLink" class="rounded-lg border p-5" :style="{ borderColor: primaryColor + '40', backgroundColor: primaryColor + '10' }">
+                            <p class="text-base font-bold" :style="{ color: primaryColor }">Your Referral Link</p>
                             <div class="mt-3 flex items-center gap-2 rounded-lg bg-white px-3 py-2">
                                 <code class="min-w-0 flex-1 truncate text-sm text-gray-600">{{ referralLink }}</code>
-                                <button type="button" @click="copyLink" class="rounded-lg p-2 text-emerald-600 hover:bg-emerald-50">
+                                <button type="button" @click="copyLink" class="rounded-lg p-2 hover:bg-gray-100" :style="{ color: primaryColor }">
                                     <Copy :size="16" />
                                 </button>
                             </div>
@@ -134,7 +134,7 @@
                         <div v-for="user in referredUsersList" :key="user.id" class="rounded-lg border border-gray-200 p-5">
                             <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                                 <div class="flex min-w-0 gap-4">
-                                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-lg font-bold text-emerald-500">
+                                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white" :style="{ backgroundColor: primaryColor + '20', color: primaryColor }">
                                         {{ initials(user.name) }}
                                     </div>
                                     <div class="min-w-0">
@@ -148,11 +148,11 @@
                                 </div>
 
                                 <div class="text-left sm:text-right">
-                                    <span class="inline-flex rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white">
+                                    <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold text-white" :style="{ backgroundColor: primaryColor }">
                                         {{ planName(user) }}
                                     </span>
                                     <p class="mt-2 text-sm text-gray-500">{{ planPrice(user) }}/month</p>
-                                    <p v-if="commissionAmount(user) > 0" class="mt-1 text-sm font-bold text-emerald-600">
+                                    <p v-if="commissionAmount(user) > 0" class="mt-1 text-sm font-bold" :style="{ color: primaryColor }">
                                         +{{ money(commissionAmount(user)) }}
                                     </p>
                                 </div>
@@ -164,7 +164,7 @@
                                         <p class="font-bold text-gray-900">Commission History</p>
                                         <p class="text-sm text-gray-500">{{ commissionPercentage(user) }}% commission</p>
                                     </div>
-                                    <p class="font-bold text-emerald-600">+{{ money(commissionAmount(user)) }}</p>
+                                    <p class="font-bold" :style="{ color: primaryColor }">+{{ money(commissionAmount(user)) }}</p>
                                 </div>
                             </div>
                         </div>
@@ -320,6 +320,8 @@ import TextInput from '@/components/ui/TextInput.vue';
 import PrimaryButton from '@/components/ui/PrimaryButton.vue';
 import Pagination from '@/components/ui/Pagination.vue';
 import { usePermissions } from '@/composables/usePermissions';
+import { useBrand } from '@/contexts/BrandContext';
+import { THEME_COLORS } from '@/composables/useAppearance';
 
 interface Company {
     id: number;
@@ -377,6 +379,11 @@ const props = defineProps<{
 }>();
 
 const { isSuperAdmin } = usePermissions();
+const { themeColor, customColor } = useBrand();
+const primaryColor = computed(() => {
+    const color = themeColor.value;
+    return color === 'custom' ? customColor.value : (THEME_COLORS[color as keyof typeof THEME_COLORS] || THEME_COLORS.green);
+});
 const showPayoutModal = ref(false);
 
 const payoutRows = computed(() => props.payoutRequests?.data ?? []);

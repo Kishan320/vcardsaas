@@ -1,5 +1,5 @@
 <template>
-    <header class="h-14 bg-white border-b border-gray-100 flex items-center gap-3 px-4 flex-shrink-0 z-30">
+    <header class="h-14 bg-card border-b flex items-center gap-3 px-4 flex-shrink-0 z-30">
         <!-- Mobile menu toggle -->
         <button @click="$emit('menu-click')" class="p-2 rounded-lg hover:bg-gray-100 transition-colors lg:hidden">
             <Menu :size="18" class="text-gray-600" />
@@ -21,7 +21,8 @@
                 <input
                     type="text"
                     placeholder="Search…"
-                    class="w-full pl-9 pr-4 py-1.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-400 transition-all placeholder:text-gray-400"
+                    class="w-full pl-9 pr-4 py-1.5 text-sm bg-muted border rounded-lg focus:outline-none focus:ring-2 transition-all placeholder:text-muted-foreground text-foreground"
+                    :style="{ '--tw-ring-color': 'var(--theme-color)' }"
                 />
             </div>
         </div>
@@ -39,10 +40,10 @@
 
                 <div
                     v-if="notifOpen"
-                    class="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-modal border border-gray-100 z-50 animate-fade-in overflow-hidden"
+                    class="absolute right-0 top-full mt-2 w-80 bg-card rounded-xl shadow-modal border z-50 animate-fade-in overflow-hidden"
                 >
-                    <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-                        <span class="text-sm font-semibold text-gray-900">Notifications</span>
+                    <div class="flex items-center justify-between px-4 py-3 border-b">
+                        <span class="text-sm font-semibold text-foreground">Notifications</span>
                     </div>
                     <div v-if="flash?.success" class="flex items-start gap-3 px-4 py-3 bg-green-50">
                         <div class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0 bg-green-500" />
@@ -52,7 +53,7 @@
                         <div class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0 bg-red-500" />
                         <p class="text-sm text-red-800">{{ flash.error }}</p>
                     </div>
-                    <div v-if="!hasFlash" class="px-4 py-6 text-center text-sm text-gray-400">
+                    <div v-if="!hasFlash" class="px-4 py-6 text-center text-sm text-muted-foreground">
                         No new notifications
                     </div>
                 </div>
@@ -64,34 +65,34 @@
                     @click="profileOpen = !profileOpen; notifOpen = false"
                     class="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
                 >
-                    <div class="w-7 h-7 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-xs font-bold">
+                    <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold" :style="{ backgroundColor: 'var(--theme-color)' }">
                         {{ initials }}
                     </div>
-                    <span class="text-sm font-medium text-gray-700 hidden sm:block">{{ user?.name }}</span>
+                    <span class="text-sm font-medium text-foreground hidden sm:block">{{ user?.name }}</span>
                     <ChevronDown :size="14" class="text-gray-400" />
                 </button>
 
                 <div
                     v-if="profileOpen"
-                    class="absolute right-0 top-full mt-2 w-52 bg-white rounded-xl shadow-modal border border-gray-100 z-50 animate-fade-in overflow-hidden"
+                    class="absolute right-0 top-full mt-2 w-52 bg-card rounded-xl shadow-modal border z-50 animate-fade-in overflow-hidden"
                 >
-                    <div class="px-4 py-3 border-b border-gray-100">
-                        <p class="text-sm font-semibold text-gray-900">{{ user?.name }}</p>
-                        <p class="text-xs text-gray-500">{{ user?.email }}</p>
+                    <div class="px-4 py-3 border-b">
+                        <p class="text-sm font-semibold text-foreground">{{ user?.name }}</p>
+                        <p class="text-xs text-muted-foreground">{{ user?.email }}</p>
                     </div>
                     <Link
                         :href="route('profile')"
-                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
                     >
-                        <User :size="14" class="text-gray-400" /> Profile
+                        <User :size="14" class="text-muted-foreground" /> Profile
                     </Link>
                     <Link
                         :href="route('settings')"
-                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
                     >
-                        <Settings :size="14" class="text-gray-400" /> Settings
+                        <Settings :size="14" class="text-muted-foreground" /> Settings
                     </Link>
-                    <div class="border-t border-gray-100">
+                    <div class="border-t">
                         <Link
                             :href="route('logout')"
                             method="post"

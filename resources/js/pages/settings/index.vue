@@ -33,7 +33,10 @@
         <!-- Main Content -->
         <div class="flex-1">
           <!-- System Settings Section -->
-          <section id="system-settings" ref="systemSettingsRef" class="mb-8">
+          <section
+            v-if="canSee('manage-system-settings') || isSuperAdmin || isCompany"
+            id="system-settings" ref="systemSettingsRef" class="mb-8"
+          >
             <SystemSettings
               :settings="systemSettings"
               :timezones="timezones"
@@ -43,67 +46,106 @@
           </section>
 
           <!-- Brand Settings Section -->
-          <section id="brand-settings" ref="brandSettingsRef" class="mb-8">
+          <section
+            v-if="canSee('manage-brand-settings') || isSuperAdmin"
+            id="brand-settings" ref="brandSettingsRef" class="mb-8"
+          >
             <BrandSettings />
           </section>
 
           <!-- Currency Settings Section -->
-          <section id="currency-settings" ref="currencySettingsRef" class="mb-8">
+          <section
+            v-if="canSee('manage-currency-settings') || isSuperAdmin"
+            id="currency-settings" ref="currencySettingsRef" class="mb-8"
+          >
             <CurrencySettings />
           </section>
 
           <!-- Email Settings Section -->
-          <section id="email-settings" ref="emailSettingsRef" class="mb-8">
+          <section
+            v-if="canSee('manage-email-settings') || isSuperAdmin"
+            id="email-settings" ref="emailSettingsRef" class="mb-8"
+          >
             <EmailSettings />
           </section>
 
           <!-- Payment Settings Section -->
-          <section id="payment-settings" ref="paymentSettingsRef" class="mb-8">
+          <section
+            v-if="canSee('manage-payment-settings') || isSuperAdmin"
+            id="payment-settings" ref="paymentSettingsRef" class="mb-8"
+          >
             <PaymentSettings :settings="paymentSettings" />
           </section>
 
           <!-- Storage Settings Section -->
-          <section id="storage-settings" ref="storageSettingsRef" class="mb-8">
+          <section
+            v-if="canSee('manage-storage-settings') || isSuperAdmin"
+            id="storage-settings" ref="storageSettingsRef" class="mb-8"
+          >
             <StorageSettings :settings="systemSettings" />
           </section>
 
           <!-- ReCaptcha Settings Section -->
-          <section id="recaptcha-settings" ref="recaptchaSettingsRef" class="mb-8">
+          <section
+            v-if="canSee('manage-recaptcha-settings') || isSuperAdmin"
+            id="recaptcha-settings" ref="recaptchaSettingsRef" class="mb-8"
+          >
             <RecaptchaSettings :settings="systemSettings" />
           </section>
 
           <!-- Chat GPT Settings Section -->
-          <section id="chatgpt-settings" ref="chatgptSettingsRef" class="mb-8">
+          <section
+            v-if="canSee('manage-chatgpt-settings') || isSuperAdmin"
+            id="chatgpt-settings" ref="chatgptSettingsRef" class="mb-8"
+          >
             <ChatGptSettings :settings="systemSettings" />
           </section>
 
           <!-- Cookie Settings Section -->
-          <section id="cookie-settings" ref="cookieSettingsRef" class="mb-8">
+          <section
+            v-if="canSee('manage-cookie-settings') || isSuperAdmin"
+            id="cookie-settings" ref="cookieSettingsRef" class="mb-8"
+          >
             <CookieSettings :settings="systemSettings" />
           </section>
 
           <!-- SEO Settings Section -->
-          <section id="seo-settings" ref="seoSettingsRef" class="mb-8">
+          <section
+            v-if="canSee('manage-seo-settings') || isSuperAdmin"
+            id="seo-settings" ref="seoSettingsRef" class="mb-8"
+          >
             <SeoSettings :settings="systemSettings" />
           </section>
 
           <!-- Cache Settings Section -->
-          <section id="cache-settings" ref="cacheSettingsRef" class="mb-8">
+          <section
+            v-if="canSee('manage-cache-settings') || isSuperAdmin"
+            id="cache-settings" ref="cacheSettingsRef" class="mb-8"
+          >
             <CacheSettings :cache-size="cacheSize" />
           </section>
 
           <!-- Google Calendar Settings Section -->
-          <section id="google-calendar-settings" ref="googleCalendarSettingsRef" class="mb-8">
+          <section
+            v-if="canSee('settings') || isCompany"
+            id="google-calendar-settings" ref="googleCalendarSettingsRef" class="mb-8"
+          >
             <GoogleCalendarSettings :settings="systemSettings" />
           </section>
 
           <!-- Google Wallet Settings Section -->
-          <section id="google-wallet-settings" ref="googleWalletSettingsRef" class="mb-8">
+          <section
+            v-if="canSee('settings') || isCompany"
+            id="google-wallet-settings" ref="googleWalletSettingsRef" class="mb-8"
+          >
             <GoogleWalletSettings :settings="systemSettings" />
           </section>
 
-          <!-- Webhook Settings Section -->
-          <section id="webhook-settings" ref="webhookSettingsRef" class="mb-8">
+          <!-- Webhook Settings Section (company only, not superadmin) -->
+          <section
+            v-if="canSee('manage-webhook-settings') && !isSuperAdmin"
+            id="webhook-settings" ref="webhookSettingsRef" class="mb-8"
+          >
             <WebhookSettings :webhooks="webhooks" />
           </section>
         </div>
@@ -161,6 +203,10 @@ import WebhookSettings from './components/WebhookSettings.vue';
 const { t } = useI18n();
 const page = usePage();
 const { systemSettings = {}, cacheSize = '0.00', timezones = {}, dateFormats = {}, timeFormats = {}, paymentSettings = {}, webhooks = [], auth = {} } = page.props as any;
+
+const isSuperAdmin = auth.user?.type === 'superadmin';
+const isCompany = auth.user?.type === 'company';
+const canSee = (permission: string) => auth.permissions?.includes(permission) ?? false;
 
 const activeSection = ref('system-settings');
 const isManualNavigation = ref(false);
@@ -269,17 +315,19 @@ const allSidebarNavItems = [
   }
 ];
 
-// Filter sidebar items based on user permissions
+// Filter sidebar items based on user permissions (mirrors React logic)
 const sidebarNavItems = allSidebarNavItems.filter(item => {
-  // If no permission is required or user has the permission
   if (!item.permission || (auth.permissions && auth.permissions.includes(item.permission))) {
     return true;
   }
-  // For company users, only show specific settings
   if (auth.user && auth.user.type === 'company') {
     return ['manage-system-settings', 'manage-email-settings', 'manage-brand-settings', 'manage-webhook-settings', 'settings'].includes(item.permission);
   }
   return false;
+}).filter(item => {
+  // Webhook only for non-superadmin
+  if (item.href === '#webhook-settings' && auth.user?.type === 'superadmin') return false;
+  return true;
 });
 
 // Smart scroll functionality
