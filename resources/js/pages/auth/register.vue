@@ -118,9 +118,9 @@
                 <Checkbox v-model:checked="form.terms" />
                 <label class="text-sm text-[hsl(var(--muted-foreground))]">
                     I agree to the 
-                    <a :href="termsConditionsUrl || '#'" target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:text-primary-700">Terms of Service</a>
+                    <a :href="termsConditionsUrl || '#'" target="_blank" rel="noopener noreferrer" class="transition-colors" :style="{ color: 'var(--theme-color)' }">Terms of Service</a>
                     and 
-                    <a href="#" class="text-primary-600 hover:text-primary-700">Privacy Policy</a>
+                    <a href="#" class="transition-colors" :style="{ color: 'var(--theme-color)' }">Privacy Policy</a>
                 </label>
             </div>
 
@@ -132,7 +132,7 @@
 
         <p class="mt-6 text-center text-sm text-[hsl(var(--muted-foreground))]">
             Already have an account?
-            <Link :href="route('login')" class="font-semibold text-primary-600 hover:text-primary-700 transition-colors">
+            <Link :href="route('login')" class="font-semibold transition-colors" :style="{ color: 'var(--theme-color)' }">
                 Sign in
             </Link>
         </p>

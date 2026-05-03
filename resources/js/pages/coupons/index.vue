@@ -84,13 +84,13 @@
                                     <code class="text-sm font-mono bg-gray-100 px-2 py-0.5 rounded font-semibold text-gray-800">{{ coupon.code }}</code>
                                 </td>
                                 <td class="px-4 py-3 font-semibold text-gray-900">
-                                    {{ coupon.discount_type === 'percentage' ? coupon.discount_amount + '%' : '$' + parseFloat(String(coupon.discount_amount)).toFixed(2) }}
+                                    {{ coupon.discount_type === 'percentage' ? coupon.discount_amount + '%' : formatPrice(coupon.discount_amount) }}
                                 </td>
                                 <td class="px-4 py-3">
                                     <span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full capitalize">{{ coupon.discount_type }}</span>
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-600">{{ coupon.used_count ?? 0 }} / {{ coupon.use_limit_per_coupon ?? '∞' }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-600">{{ coupon.minimum_spend ? '$' + parseFloat(String(coupon.minimum_spend)).toFixed(2) : '—' }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">{{ coupon.minimum_spend ? formatPrice(coupon.minimum_spend) : '—' }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-500">{{ coupon.expires_at ? formatDate(coupon.expires_at) : '—' }}</td>
                                 <td class="px-4 py-3">
                                     <span class="text-xs px-2 py-0.5 rounded-full font-medium"
@@ -138,7 +138,7 @@
                             <InputLabel value="Discount Type" required />
                             <select v-model="form.discount_type" class="mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-200">
                                 <option value="percentage">Percentage (%)</option>
-                                <option value="fixed">Fixed Amount ($)</option>
+                                <option value="fixed">Fixed Amount ({{ getCurrencySymbol() }})</option>
                             </select>
                             <InputError :message="form.errors.discount_type" />
                         </div>
@@ -158,12 +158,12 @@
                             <InputError :message="form.errors.use_limit_per_user" />
                         </div>
                         <div>
-                            <InputLabel value="Minimum Spend ($)" />
+                            <InputLabel :value="`Minimum Spend (${getCurrencySymbol()})`" />
                             <TextInput v-model="form.minimum_spend" type="number" step="0.01" min="0" class="mt-1.5" placeholder="0.00" />
                             <InputError :message="form.errors.minimum_spend" />
                         </div>
                         <div>
-                            <InputLabel value="Maximum Spend ($)" />
+                            <InputLabel :value="`Maximum Spend (${getCurrencySymbol()})`" />
                             <TextInput v-model="form.maximum_spend" type="number" step="0.01" min="0" class="mt-1.5" placeholder="No limit" />
                             <InputError :message="form.errors.maximum_spend" />
                         </div>
@@ -219,6 +219,7 @@ import InputLabel from '@/components/ui/InputLabel.vue';
 import InputError from '@/components/ui/InputError.vue';
 import TextInput from '@/components/ui/TextInput.vue';
 import PrimaryButton from '@/components/ui/PrimaryButton.vue';
+import { useCurrency } from '@/composables/useCurrency';
 
 interface Coupon {
     id: number; code: string; discount_amount: number; discount_type: string;
@@ -231,6 +232,7 @@ const props = defineProps<{
     filters?: { search?: string; discount_type?: string; status?: string; per_page?: string };
 }>();
 
+const { formatPrice, getCurrencySymbol } = useCurrency();
 const searchTerm = ref(props.filters?.search ?? '');
 const typeFilter = ref(props.filters?.discount_type ?? '');
 const statusFilter = ref(props.filters?.status ?? '');

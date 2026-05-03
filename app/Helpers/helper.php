@@ -71,6 +71,33 @@ if (! function_exists('settings')) {
             }
         }
 
+        // Add currency information from Currency model
+        if (isset($userSettings['defaultCurrency'])) {
+            try {
+                $currency = \App\Models\Currency::where('code', $userSettings['defaultCurrency'])->first();
+                if ($currency) {
+                    $userSettings['currencySymbol'] = $currency->symbol;
+                    $userSettings['currencyCode'] = $currency->code;
+                    $userSettings['currencyName'] = $currency->name;
+                } else {
+                    // Fallback to USD if currency not found
+                    $userSettings['currencySymbol'] = '$';
+                    $userSettings['currencyCode'] = 'USD';
+                    $userSettings['currencyName'] = 'US Dollar';
+                }
+            } catch (\Exception $e) {
+                // Fallback in case of database error
+                $userSettings['currencySymbol'] = '$';
+                $userSettings['currencyCode'] = 'USD';
+                $userSettings['currencyName'] = 'US Dollar';
+            }
+        } else {
+            // Default currency settings
+            $userSettings['currencySymbol'] = '$';
+            $userSettings['currencyCode'] = 'USD';
+            $userSettings['currencyName'] = 'US Dollar';
+        }
+
         return $userSettings;
     }
 }
@@ -984,7 +1011,7 @@ if (! function_exists('defaultSettings')) {
             'customColor' => '#10b981',
             'sidebarVariant' => 'inset',
             'sidebarStyle' => 'plain',
-            'layoutDirection' => 'left',
+            'layoutDirection' => 'ltr',
             'themeMode' => 'light',
             
             // Storage Settings

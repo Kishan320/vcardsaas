@@ -49,7 +49,7 @@
                                     <Users :size="15" />
                                     {{ numberValue(company.referral_count) }}
                                 </div>
-                                <p class="text-sm font-semibold text-emerald-600">{{ money(company.total_earned) }}</p>
+                                <p class="text-sm font-semibold text-emerald-600">{{ formatPrice(company.total_earned) }}</p>
                             </div>
                         </div>
                         <div v-if="!topCompaniesList.length" class="py-10 text-center text-sm text-gray-400">
@@ -88,7 +88,7 @@
                             <div class="flex items-start justify-between">
                                 <div>
                                     <p class="text-base font-bold text-violet-700">Payouts Processed</p>
-                                    <p class="mt-3 text-3xl font-bold text-violet-700">{{ money(totalMonthlyPayouts) }}</p>
+                                    <p class="mt-3 text-3xl font-bold text-violet-700">{{ formatPrice(totalMonthlyPayouts) }}</p>
                                     <p class="mt-2 flex items-center gap-1 text-sm font-semibold text-violet-500">
                                         <CalendarDays :size="15" />
                                         Total this year
@@ -153,7 +153,7 @@
                                     </span>
                                     <p class="mt-2 text-sm text-gray-500">{{ planPrice(user) }}/month</p>
                                     <p v-if="commissionAmount(user) > 0" class="mt-1 text-sm font-bold" :style="{ color: primaryColor }">
-                                        +{{ money(commissionAmount(user)) }}
+                                        +{{ formatPrice(commissionAmount(user)) }}
                                     </p>
                                 </div>
                             </div>
@@ -164,7 +164,7 @@
                                         <p class="font-bold text-gray-900">Commission History</p>
                                         <p class="text-sm text-gray-500">{{ commissionPercentage(user) }}% commission</p>
                                     </div>
-                                    <p class="font-bold" :style="{ color: primaryColor }">+{{ money(commissionAmount(user)) }}</p>
+                                    <p class="font-bold" :style="{ color: primaryColor }">+{{ formatPrice(commissionAmount(user)) }}</p>
                                 </div>
                             </div>
                         </div>
@@ -205,7 +205,7 @@
                                         <p class="font-bold text-gray-900">{{ payout.company?.name ?? 'Company' }}</p>
                                         <p class="text-xs text-gray-500">{{ payout.company?.email ?? 'company@example.com' }}</p>
                                     </td>
-                                    <td class="px-4 py-4 font-semibold text-gray-700">{{ money(payout.amount) }}</td>
+                                    <td class="px-4 py-4 font-semibold text-gray-700">{{ formatPrice(payout.amount) }}</td>
                                     <td class="px-4 py-4">
                                         <span class="rounded-full px-3 py-1 text-xs font-semibold capitalize" :class="statusClass(payout.status)">
                                             {{ payout.status }}
@@ -322,6 +322,7 @@ import Pagination from '@/components/ui/Pagination.vue';
 import { usePermissions } from '@/composables/usePermissions';
 import { useBrand } from '@/contexts/BrandContext';
 import { THEME_COLORS } from '@/composables/useAppearance';
+import { useCurrency } from '@/composables/useCurrency';
 
 interface Company {
     id: number;
@@ -380,6 +381,7 @@ const props = defineProps<{
 
 const { isSuperAdmin } = usePermissions();
 const { themeColor, customColor } = useBrand();
+const { formatPrice } = useCurrency();
 const primaryColor = computed(() => {
     const color = themeColor.value;
     return color === 'custom' ? customColor.value : (THEME_COLORS[color as keyof typeof THEME_COLORS] || THEME_COLORS.green);
@@ -419,7 +421,7 @@ const dashboardCards = computed(() => [
     },
     {
         label: 'Total Commission',
-        value: money(props.stats?.totalCommissionPaid ?? props.stats?.availableBalance ?? 0),
+        value: formatPrice(props.stats?.totalCommissionPaid ?? props.stats?.availableBalance ?? 0),
         caption: isSuperAdmin.value ? 'Total payouts' : 'Available balance',
         icon: DollarSign,
         border: 'border-emerald-200 bg-emerald-50/40',
@@ -456,7 +458,7 @@ const referredCards = computed(() => [
     },
     {
         label: 'Total Commission Earned',
-        value: money(totalCommissionEarned.value),
+        value: formatPrice(totalCommissionEarned.value),
         icon: DollarSign,
         iconBg: 'bg-amber-50',
         iconColor: 'text-amber-500',
@@ -480,10 +482,6 @@ function sumObjectValues(value: Record<string, number | string> | undefined): nu
     return Object.values(value ?? {}).reduce((total, item) => total + numberValue(item), 0);
 }
 
-function money(value: unknown): string {
-    return `$${numberValue(value).toFixed(2)}`;
-}
-
 function formatDate(value: string): string {
     if (!value) return '-';
     return new Date(value).toLocaleDateString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -499,7 +497,7 @@ function planName(user: ReferredUser): string {
 
 function planPrice(user: ReferredUser): string {
     const price = user.plan?.monthly_price ?? user.plan?.price ?? 0;
-    return money(price);
+    return formatPrice(price);
 }
 
 function commissionAmount(user: ReferredUser): number {

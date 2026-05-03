@@ -1,5 +1,5 @@
 <template>
-  <section class="relative gradient-hero min-h-screen flex items-center overflow-hidden">
+  <section class="relative min-h-screen flex items-center overflow-hidden" :class="heroClasses" :style="sectionStyles">
     <!-- Theme Background Shapes -->
     <div class="absolute inset-0 opacity-10">
       <div class="absolute top-20 left-20 w-72 h-72 rounded-full blur-3xl bg-secondary-400" :style="{ backgroundColor: 'var(--secondary-color)' }" />
@@ -50,10 +50,10 @@
 
         <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
           <Link :href="route('register')" class="flex items-center gap-2 px-8 py-3.5 bg-white text-gray-900 font-bold rounded-xl text-base hover:bg-gray-50 transition-all duration-150 active:scale-95 shadow-lg justify-center">
-            {{ data?.cta_text || 'Start for Free' }} <ChevronRight :size="18" />
+            {{ data?.cta_text || data?.primary_button_text || 'Start for Free' }} <ChevronRight :size="18" />
           </Link>
           <a :href="data?.secondary_cta_link || '#features'" class="flex items-center gap-2 px-8 py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl text-base transition-all duration-150 active:scale-95 border border-white/30 justify-center">
-            {{ data?.secondary_cta_text || 'See How It Works' }}
+            {{ data?.secondary_cta_text || data?.secondary_button_text || 'See How It Works' }}
           </a>
         </div>
 
@@ -83,6 +83,21 @@ import { ChevronRight, TrendingUp, Eye, CreditCard, Globe, Smartphone } from 'lu
 const props = defineProps<{
   data?: any;
 }>();
+
+const heroClasses = computed(() => {
+  return props.data?.background_color ? 'gradient-hero-custom' : 'gradient-hero';
+});
+
+const sectionStyles = computed(() => {
+  const styles: any = {};
+  if (props.data?.background_color) {
+    styles.background = `linear-gradient(135deg, ${props.data.background_color}dd 0%, ${props.data.background_color}aa 50%, ${props.data.background_color}77 100%)`;
+  }
+  if (props.data?.text_color) {
+    styles.color = props.data.text_color;
+  }
+  return styles;
+});
 
 const displayStats = computed(() => {
   if (props.data?.stats && props.data.stats.length > 0) {

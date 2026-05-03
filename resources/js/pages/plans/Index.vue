@@ -79,7 +79,7 @@
                             <h3 class="text-2xl font-bold mb-1" :class="plan.recommended ? 'text-primary' : 'text-gray-900'">{{ plan.name }}</h3>
                             <div class="flex items-baseline gap-1 mb-2">
                                 <span class="text-3xl font-extrabold" :class="plan.recommended ? 'text-primary' : 'text-gray-900'">
-                                    ${{ parseFloat(String(plan.price)).toFixed(2) }}
+                                    {{ formatPrice(plan.price) }}
                                 </span>
                                 <span class="text-gray-400 text-sm">/{{ plan.duration?.toLowerCase() ?? 'month' }}</span>
                             </div>
@@ -228,6 +228,7 @@ import { Plus, Pencil, Trash2, CheckCircle2, X, Sparkles, Crown, Zap, Clock, Pac
 import AppLayout from '@/layouts/AppLayout.vue';
 import FlashMessage from '@/components/ui/FlashMessage.vue';
 import Modal from '@/components/ui/Modal.vue';
+import { useCurrency } from '@/composables/useCurrency';
 
 interface PlanStats { businesses: any; users: any; storage: any; templates: any; bio_links?: any; bio_links_templates?: any; addons?: number; addon_names?: string[] }
 interface Plan {
@@ -248,6 +249,7 @@ const props = defineProps<{
 }>();
 
 const page = usePage();
+const { formatPrice } = useCurrency();
 const billingCycle = ref<'monthly' | 'yearly'>(props.billingCycle ?? 'monthly');
 const loadingCycle = ref(false);
 

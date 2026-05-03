@@ -62,7 +62,7 @@
                                         {{ req.status }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3 font-medium text-gray-900">${{ parseFloat(req.total_price || 0).toFixed(2) }}</td>
+                                <td class="px-4 py-3 font-medium text-gray-900">{{ formatPrice(req.total_price || 0) }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-500">{{ new Date(req.created_at).toLocaleDateString() }}</td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center justify-end gap-1">
@@ -160,7 +160,7 @@
                         <div class="space-y-2 text-sm">
                             <div class="flex justify-between">
                                 <span class="text-gray-500">Unit Price:</span>
-                                <span class="font-medium text-gray-900">${{ parseFloat(selectedReq.original_price || 0).toFixed(2) }}</span>
+                                <span class="font-medium text-gray-900">{{ formatPrice(selectedReq.original_price || 0) }}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-500">Quantity:</span>
@@ -168,7 +168,7 @@
                             </div>
                             <div class="flex justify-between font-semibold text-gray-900 border-t border-gray-200 pt-2">
                                 <span>Total Price:</span>
-                                <span>${{ parseFloat(selectedReq.total_price || 0).toFixed(2) }}</span>
+                                <span>{{ formatPrice(selectedReq.total_price || 0) }}</span>
                             </div>
                         </div>
                     </div>
@@ -219,6 +219,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import FlashMessage from '@/components/ui/FlashMessage.vue';
 import Modal from '@/components/ui/Modal.vue';
 import Pagination from '@/components/ui/Pagination.vue';
+import { useCurrency } from '@/composables/useCurrency';
 import type { PageProps } from '@/types';
 
 interface OrderRequest {
@@ -233,6 +234,7 @@ const props = defineProps<{
     filters?: { search?: string; status?: string };
 }>();
 
+const { formatPrice } = useCurrency();
 const isSuperAdmin = computed(() => {
     const u = page.props.auth?.user as any;
     return !!(u?.is_super_admin || u?.type === 'superadmin' || u?.type === 'super admin');

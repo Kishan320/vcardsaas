@@ -52,10 +52,17 @@
 import { computed } from 'vue';
 import { Mail, Phone, MapPin, Twitter, Linkedin, Instagram, Youtube, Facebook, CreditCard } from 'lucide-vue-next';
 
+interface CustomPage {
+  id: number;
+  title: string;
+  slug: string;
+}
+
 const props = defineProps<{ 
   settings?: any;
   theme?: any;
   data?: any;
+  customPages?: CustomPage[];
 }>();
 
 const icons: Record<string, any> = {
@@ -79,28 +86,37 @@ const displaySocials = computed(() => {
   ];
 });
 
-const footerLinks = {
-  Product: [
-    { id: 'fl-features', label: 'Features', href: '#features' },
-    { id: 'fl-templates', label: 'Templates', href: '#templates' },
-    { id: 'fl-pricing', label: 'Pricing', href: '#plans' },
-  ],
-  Platform: [
-    { id: 'fl-dashboard', label: 'Dashboard', href: '/dashboard' },
-    { id: 'fl-analytics', label: 'Analytics', href: '#' },
-    { id: 'fl-domain', label: 'Custom Domain', href: '#' },
-  ],
-  Resources: [
-    { id: 'fl-docs', label: 'Documentation', href: '#' },
-    { id: 'fl-blog', label: 'Blog', href: '#' },
-    { id: 'fl-support', label: 'Support Center', href: '#' },
-  ],
-  Company: [
-    { id: 'fl-about', label: 'About Us', href: '#' },
-    { id: 'fl-contact', label: 'Contact', href: '#contact' },
-    { id: 'fl-privacy', label: 'Privacy', href: '#' },
-  ],
-};
+const footerLinks = computed(() => {
+  const customPageLinks = (props.customPages || []).map(page => ({
+    id: `custom-${page.id}`,
+    label: page.title,
+    href: `/page/${page.slug}`
+  }));
+  
+  return {
+    Product: [
+      { id: 'fl-features', label: 'Features', href: '#features' },
+      { id: 'fl-templates', label: 'Templates', href: '#templates' },
+      { id: 'fl-pricing', label: 'Pricing', href: '#plans' },
+    ],
+    Platform: [
+      { id: 'fl-dashboard', label: 'Dashboard', href: '/dashboard' },
+      { id: 'fl-analytics', label: 'Analytics', href: '#' },
+      { id: 'fl-domain', label: 'Custom Domain', href: '#' },
+    ],
+    Resources: [
+      { id: 'fl-docs', label: 'Documentation', href: '#' },
+      { id: 'fl-blog', label: 'Blog', href: '#' },
+      { id: 'fl-support', label: 'Support Center', href: '#' },
+    ],
+    Company: [
+      { id: 'fl-about', label: 'About Us', href: '#' },
+      { id: 'fl-contact', label: 'Contact', href: '#contact' },
+      { id: 'fl-privacy', label: 'Privacy', href: '#' },
+      ...customPageLinks
+    ],
+  };
+});
 
 const legalLinks = [
   { id: 'legal-privacy', label: 'Privacy Policy' },

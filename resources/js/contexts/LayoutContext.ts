@@ -1,51 +1,39 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 
-export type LayoutPosition = 'left' | 'right';
+export type LayoutPosition = 'ltr' | 'rtl';
 
-const position = ref<LayoutPosition>('left');
+const position = ref<LayoutPosition>('ltr');
 const isRtl = ref<boolean>(false);
 
 export const effectivePosition = computed<LayoutPosition>(() => {
-  return isRtl.value ? (position.value === 'left' ? 'right' : 'left') : position.value;
+  return position.value;
 });
 
 export function useLayout() {
   const updatePosition = (val: LayoutPosition) => {
     position.value = val;
-    localStorage.setItem('layoutPosition', val);
+    const dir = val === 'rtl' ? 'rtl' : 'ltr';
+    document.documentElement.dir = dir;
+    document.documentElement.setAttribute('dir', dir);
+    isRtl.value = val === 'rtl';
   };
 
   const checkRtl = () => {
     isRtl.value = document.documentElement.dir === 'rtl';
+    position.value = isRtl.value ? 'rtl' : 'ltr';
   };
 
   onMounted(() => {
-    const storedPosition = localStorage.getItem('layoutPosition') as LayoutPosition;
-    if (storedPosition === 'left' || storedPosition === 'right') {
-      position.value = storedPosition;
-    }
-
     checkRtl();
 
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'dir') {
-          checkRtl();
-        }
+        if (mutation.attributeName === 'dir') checkRtl();
       });
     });
-
     observer.observe(document.documentElement, { attributes: true });
-
-    onUnmounted(() => {
-      observer.disconnect();
-    });
+    onUnmounted(() => observer.disconnect());
   });
 
-  return {
-    position,
-    effectivePosition,
-    updatePosition,
-    isRtl,
-  };
+  return { position, effectivePosition, updatePosition, isRtl };
 }

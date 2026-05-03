@@ -78,7 +78,8 @@
                 <Link
                     v-if="canResetPassword"
                     :href="route('password.request')"
-                    class="text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors"
+                    class="text-sm font-medium transition-colors"
+                    :style="{ color: 'var(--theme-color)' }"
                 >
                     Forgot password?
                 </Link>
@@ -92,7 +93,7 @@
 
         <p v-if="registrationEnabled" class="mt-6 text-center text-sm text-[hsl(var(--muted-foreground))]">
             Don't have an account?
-            <Link :href="route('register')" class="font-semibold text-primary-600 hover:text-primary-700 transition-colors">
+            <Link :href="route('register')" class="font-semibold transition-colors" :style="{ color: 'var(--theme-color)' }">
                 Create one
             </Link>
         </p>

@@ -18,12 +18,12 @@
                   v-for="item in sidebarNavItems"
                   :key="item.href"
                   variant="ghost"
-                  class="w-full justify-start"
+                  class="w-full !justify-start text-left"
                   :class="{ 'bg-muted font-medium': activeSection === item.href.replace('#', '') }"
                   @click="handleNavClick(item.href)"
                 >
-                  <component :is="item.icon" class="h-4 w-4 mr-2" />
-                  {{ item.title }}
+                  <component :is="item.icon" class="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span class="flex-1 text-left">{{ item.title }}</span>
                 </Button>
               </div>
             </ScrollArea>

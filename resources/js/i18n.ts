@@ -18,22 +18,6 @@ const customBackend = {
         // Extract translations from the structured response
         const translations = data.translations;
         
-        // Set document direction based on layoutDirection
-        if (data.layoutDirection) {
-          // Force direction change regardless of previous state
-          document.documentElement.dir = data.layoutDirection;
-          document.documentElement.setAttribute('dir', data.layoutDirection);
-          
-          // Store direction in localStorage for persistence
-          localStorage.setItem('layoutDirection', data.layoutDirection);
-          
-          // Force re-render of sidebar by adding and removing a class
-          document.documentElement.classList.add('direction-changed');
-          setTimeout(() => {
-            document.documentElement.classList.remove('direction-changed');
-          }, 50);
-        }
-        
         // Store the current locale
         if (data.locale) {
           localStorage.setItem('i18nextLng', data.locale);
@@ -97,19 +81,7 @@ export async function loadTranslations(language: string) {
     // Extract translations from the structured response
     const translations = data.translations;
     
-    // Set document direction based on layoutDirection
-    if (data.layoutDirection) {
-      document.documentElement.dir = data.layoutDirection;
-      document.documentElement.setAttribute('dir', data.layoutDirection);
-      localStorage.setItem('layoutDirection', data.layoutDirection);
-      
-      document.documentElement.classList.add('direction-changed');
-      setTimeout(() => {
-        document.documentElement.classList.remove('direction-changed');
-      }, 50);
-    }
-    
-    // Store the current locale
+    // Store the current locale only — direction is managed by BrandContext
     if (data.locale) {
       localStorage.setItem('i18nextLng', data.locale);
       document.cookie = `app_language=${data.locale}; path=/; max-age=${60 * 60 * 24}`;

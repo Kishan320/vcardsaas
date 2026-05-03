@@ -82,7 +82,7 @@
                                 <td class="px-4 py-3">
                                     <span class="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">{{ order.plan?.name }}</span>
                                 </td>
-                                <td class="px-4 py-3 font-semibold text-gray-900">${{ parseFloat(String(order.final_price ?? order.price ?? 0)).toFixed(2) }}</td>
+                                <td class="px-4 py-3 font-semibold text-gray-900">{{ formatPrice(order.final_price ?? order.price ?? 0) }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-600 capitalize">{{ order.payment_method }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-600 capitalize">{{ order.billing_cycle ?? '—' }}</td>
                                 <td class="px-4 py-3">
@@ -126,6 +126,7 @@ import { Search, Filter, CheckCircle, XCircle } from 'lucide-vue-next';
 import AppLayout from '@/layouts/AppLayout.vue';
 import FlashMessage from '@/components/ui/FlashMessage.vue';
 import Pagination from '@/components/ui/Pagination.vue';
+import { useCurrency } from '@/composables/useCurrency';
 
 interface PlanOrder { id: number; status: string; price?: string; final_price?: string; payment_method: string; billing_cycle?: string; created_at: string; user?: { name: string }; plan?: { name: string } }
 
@@ -135,6 +136,7 @@ const props = defineProps<{
     filters?: { search?: string; status?: string; payment_method?: string; per_page?: string };
 }>();
 
+const { formatPrice } = useCurrency();
 const searchTerm = ref(props.filters?.search ?? '');
 const statusFilter = ref(props.filters?.status ?? '');
 const paymentFilter = ref(props.filters?.payment_method ?? '');

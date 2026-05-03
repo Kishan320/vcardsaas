@@ -254,21 +254,21 @@
                 <div class="grid grid-cols-2 gap-2">
                   <Button
                     type="button"
-                    :variant="brandSettings.layoutDirection === 'left' ? 'default' : 'outline'"
+                    :variant="brandSettings.layoutDirection === 'ltr' ? 'default' : 'outline'"
                     class="h-10 justify-start"
-                    @click="brandSettings.layoutDirection = 'left'"
+                    @click="brandSettings.layoutDirection = 'ltr'"
                   >
                     {{ t('Left-to-Right') }}
-                    <Check v-if="brandSettings.layoutDirection === 'left'" :size="14" class="ml-2" />
+                    <Check v-if="brandSettings.layoutDirection === 'ltr'" :size="14" class="ml-2" />
                   </Button>
                   <Button
                     type="button"
-                    :variant="brandSettings.layoutDirection === 'right' ? 'default' : 'outline'"
+                    :variant="brandSettings.layoutDirection === 'rtl' ? 'default' : 'outline'"
                     class="h-10 justify-start"
-                    @click="brandSettings.layoutDirection = 'right'"
+                    @click="brandSettings.layoutDirection = 'rtl'"
                   >
                     {{ t('Right-to-Left') }}
-                    <Check v-if="brandSettings.layoutDirection === 'right'" :size="14" class="ml-2" />
+                    <Check v-if="brandSettings.layoutDirection === 'rtl'" :size="14" class="ml-2" />
                   </Button>
                 </div>
               </div>
@@ -375,7 +375,7 @@ const defaultSettings = {
   customColor: '#10b981',
   sidebarVariant: 'inset',
   sidebarStyle: 'plain',
-  layoutDirection: 'left',
+  layoutDirection: 'ltr',
   themeMode: 'light'
 };
 
@@ -395,7 +395,7 @@ const brandSettings = reactive({
 
 const { updateBrandSettings } = useBrand();
 
-// Live apply on every change — no save needed
+// Live apply on every change
 watch(() => brandSettings.themeColor, (color) => {
   updateBrandSettings({ themeColor: color as any, customColor: brandSettings.customColor });
 });
@@ -406,6 +406,18 @@ watch(() => brandSettings.customColor, (color) => {
 });
 watch(() => brandSettings.themeMode, (mode) => {
   updateBrandSettings({ themeMode: mode as any });
+});
+watch(() => brandSettings.sidebarVariant, (variant) => {
+  updateBrandSettings({ sidebarVariant: variant });
+});
+watch(() => brandSettings.sidebarStyle, (style) => {
+  updateBrandSettings({ sidebarStyle: style });
+});
+watch(() => brandSettings.layoutDirection, (dir) => {
+  updateBrandSettings({ layoutDirection: dir as any });
+  // Apply direction to document immediately
+  document.documentElement.dir = dir;
+  document.documentElement.setAttribute('dir', dir);
 });
 watch(() => ({ logoDark: brandSettings.logoDark, logoLight: brandSettings.logoLight, favicon: brandSettings.favicon }), (logos) => {
   updateBrandSettings(logos);
@@ -455,10 +467,30 @@ const handleMediaSelect = (field: 'logoDark' | 'logoLight' | 'favicon', url: str
 
 const saveSettings = () => {
   saving.value = true;
-  router.post(route('settings.brand.update'), { settings: brandSettings }, {
-    onFinish: () => {
+  // Ensure we send the current reactive values
+  const payload = {
+    logoDark: brandSettings.logoDark,
+    logoLight: brandSettings.logoLight,
+    favicon: brandSettings.favicon,
+    titleText: brandSettings.titleText,
+    footerText: brandSettings.footerText,
+    themeColor: brandSettings.themeColor,
+    customColor: brandSettings.customColor,
+    sidebarVariant: brandSettings.sidebarVariant,
+    sidebarStyle: brandSettings.sidebarStyle,
+    layoutDirection: brandSettings.layoutDirection,
+    themeMode: brandSettings.themeMode,
+  };
+  router.post(route('settings.brand.update'), { settings: payload }, {
+    preserveScroll: true,
+    onSuccess: () => {
       saving.value = false;
-    }
+      // Re-apply direction after save since Inertia reload may reset it
+      document.documentElement.dir = payload.layoutDirection;
+      document.documentElement.setAttribute('dir', payload.layoutDirection);
+    },
+    onError: () => { saving.value = false; },
+    onFinish: () => { saving.value = false; }
   });
 };
 </script>

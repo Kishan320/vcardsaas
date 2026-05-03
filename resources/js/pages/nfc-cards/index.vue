@@ -55,7 +55,7 @@
 
                         <!-- Admin stats -->
                         <div v-if="isAdmin" class="flex gap-3 mb-3 text-xs text-gray-500">
-                            <span>Price: <strong class="text-gray-900">${{ parseFloat(card.price).toFixed(2) }}</strong></span>
+                            <span>Price: <strong class="text-gray-900">{{ formatPrice(card.price) }}</strong></span>
                             <span>Qty: <strong class="text-gray-900">{{ card.quantity }}</strong></span>
                         </div>
 
@@ -100,7 +100,7 @@
                         </div>
                         <div v-else class="space-y-2">
                             <div class="text-center">
-                                <p class="text-lg font-bold text-primary">${{ parseFloat(card.price).toFixed(2) }}</p>
+                                <p class="text-lg font-bold text-primary">{{ formatPrice(card.price) }}</p>
                                 <p class="text-xs text-gray-400">per card</p>
                             </div>
                             <button @click="openOrderRequest(card)" class="w-full py-2 text-sm font-semibold gradient-primary text-white rounded-lg hover:opacity-90 transition-all">
@@ -142,7 +142,7 @@
                                         @error="(e) => ((e.target as HTMLImageElement).src = 'https://placehold.co/100x100?text=N/A')" />
                                     <div v-else class="h-10 w-10 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-400">N/A</div>
                                 </td>
-                                <td v-if="isAdmin" class="px-4 py-3 text-sm text-gray-600">${{ parseFloat(card.price).toFixed(2) }}</td>
+                                <td v-if="isAdmin" class="px-4 py-3 text-sm text-gray-600">{{ formatPrice(card.price) }}</td>
                                 <td v-if="isAdmin" class="px-4 py-3 text-sm text-gray-600">{{ card.quantity }}</td>
                                 <td v-if="isAdmin" class="px-4 py-3">
                                     <button @click="toggleStatus(card)"
@@ -264,7 +264,7 @@
                     <div v-if="selectedCard" class="bg-gray-50 rounded-lg p-3 text-sm">
                         <div class="flex justify-between text-gray-600">
                             <span>Unit Price</span>
-                            <span>${{ parseFloat(selectedCard.price).toFixed(2) }}</span>
+                            <span>{{ formatPrice(selectedCard.price) }}</span>
                         </div>
                         <div class="flex justify-between text-gray-600 mt-1">
                             <span>Quantity</span>
@@ -272,7 +272,7 @@
                         </div>
                         <div class="flex justify-between font-semibold text-gray-900 border-t border-gray-200 mt-2 pt-2">
                             <span>Total</span>
-                            <span>${{ (parseFloat(selectedCard.price) * (Number(orderForm.quantity) || 1)).toFixed(2) }}</span>
+                            <span>{{ formatPrice(parseFloat(selectedCard.price) * (Number(orderForm.quantity) || 1)) }}</span>
                         </div>
                     </div>
                     <div class="flex gap-3 justify-end pt-2">
@@ -314,6 +314,7 @@ import InputError from '@/components/ui/InputError.vue';
 import TextInput from '@/components/ui/TextInput.vue';
 import PrimaryButton from '@/components/ui/PrimaryButton.vue';
 import MediaPicker from '@/components/MediaPicker.vue';
+import { useCurrency } from '@/composables/useCurrency';
 import type { PageProps } from '@/types';
 
 interface NfcCard {
@@ -329,6 +330,7 @@ const props = defineProps<{
     filters?: { search?: string };
 }>();
 
+const { formatPrice } = useCurrency();
 const searchTerm = ref(props.filters?.search ?? '');
 const activeView = ref<'grid' | 'list'>('grid');
 const flippedCards = reactive(new Set<number>());

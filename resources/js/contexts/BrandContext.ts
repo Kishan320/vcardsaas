@@ -12,7 +12,7 @@ const brandSettings = ref<BrandSettings>({
   customColor: '#3b82f6',
   sidebarVariant: 'inset',
   sidebarStyle: 'plain',
-  layoutDirection: 'left',
+  layoutDirection: 'ltr',
   themeMode: 'light',
 });
 
@@ -48,6 +48,12 @@ export function useBrand() {
     brandSettings.value = { ...brandSettings.value, ...newSettings };
     // Apply CSS variables live
     initializeTheme(brandSettings.value);
+    // Apply layout direction to document
+    if (newSettings.layoutDirection !== undefined) {
+      const dir = newSettings.layoutDirection === 'rtl' ? 'rtl' : 'ltr';
+      document.documentElement.dir = dir;
+      document.documentElement.setAttribute('dir', dir);
+    }
   };
 
   const initializeBrandSettings = (settings: any, user: any) => {
@@ -55,7 +61,12 @@ export function useBrand() {
     currentUser.value = user;
     const resolved = getBrandSettings(settings);
     brandSettings.value = resolved;
-    applyThemeFromSettings();
+    // Apply theme from DB
+    initializeTheme(resolved);
+    // Apply layout direction — always trust DB value
+    const dir = (resolved.layoutDirection === 'rtl') ? 'rtl' : 'ltr';
+    document.documentElement.dir = dir;
+    document.documentElement.setAttribute('dir', dir);
   };
 
   watch(brandSettings, () => {

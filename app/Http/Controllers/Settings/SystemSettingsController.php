@@ -68,6 +68,7 @@ class SystemSettingsController extends Controller
     public function updateBrand(Request $request)
     {
         try {
+            \Log::info('Brand update received', ['settings' => $request->input('settings')]);
             $validated = $request->validate([
                 'settings' => 'required|array',
                 'settings.logoDark' => 'nullable|string',

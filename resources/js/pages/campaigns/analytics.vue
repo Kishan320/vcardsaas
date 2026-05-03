@@ -47,8 +47,8 @@
                         <p class="text-sm font-medium text-gray-600">Total Revenue</p>
                         <DollarSign class="h-5 w-5 text-emerald-600" />
                     </div>
-                    <div class="text-3xl font-bold text-gray-900 mb-1">{{ currencySymbol }}{{ metrics.total_revenue }}</div>
-                    <p class="text-sm text-gray-600">{{ currencySymbol }}{{ Number(metrics.cost_per_day).toFixed(2) }} per day</p>
+                    <div class="text-3xl font-bold text-gray-900 mb-1">{{ formatPrice(metrics.total_revenue) }}</div>
+                    <p class="text-sm text-gray-600">{{ Number(metrics.cost_per_day).toFixed(2) }} per day</p>
                 </div>
                 <div class="rounded-xl border bg-card shadow-sm p-6">
                     <div class="flex items-center justify-between mb-3">
@@ -74,7 +74,7 @@
                         <TrendingUp class="h-5 w-5 text-purple-600" />
                     </div>
                     <div class="text-3xl font-bold text-gray-900 mb-1">{{ metrics.roi_estimate.roi_percentage }}%</div>
-                    <p class="text-sm text-gray-600">{{ currencySymbol }}{{ metrics.roi_estimate.estimated_return }} expected</p>
+                    <p class="text-sm text-gray-600">{{ formatPrice(metrics.roi_estimate.estimated_return) }} expected</p>
                 </div>
             </div>
 
@@ -122,11 +122,11 @@
                         </div>
                         <div class="flex justify-between items-center py-2 bg-emerald-50 px-3 rounded">
                             <span class="text-emerald-700 font-medium">Total Revenue</span>
-                            <span class="font-bold text-emerald-900">{{ currencySymbol }}{{ businessStats?.total_revenue || 0 }}</span>
+                            <span class="font-bold text-emerald-900">{{ formatPrice(businessStats?.total_revenue || 0) }}</span>
                         </div>
                         <div class="flex justify-between items-center py-2">
                             <span class="text-gray-600">Current Campaign</span>
-                            <span class="font-semibold text-blue-600">{{ currencySymbol }}{{ campaign.total_amount }}</span>
+                            <span class="font-semibold text-blue-600">{{ formatPrice(campaign.total_amount) }}</span>
                         </div>
                         <div class="flex justify-between items-center py-2">
                             <span class="text-gray-600">Contribution</span>
@@ -151,7 +151,7 @@
                                     <p class="font-medium text-gray-900">{{ trend.month }}</p>
                                     <p class="text-sm text-gray-600">{{ trend.count }} campaigns</p>
                                 </div>
-                                <p class="font-semibold text-emerald-600">{{ currencySymbol }}{{ Number(trend.revenue ?? 0).toFixed(2) }}</p>
+                                <p class="font-semibold text-emerald-600">{{ formatPrice(trend.revenue ?? 0) }}</p>
                             </div>
                         </div>
                     </div>
@@ -227,6 +227,7 @@
 import { computed } from 'vue';
 import { Users, Building2, Calendar, DollarSign, Activity, Clock, TrendingUp, BarChart3, Target, ArrowUpRight, PieChart as PieChartIcon } from 'lucide-vue-next';
 import PageTemplate from '@/components/page-template.vue';
+import { useCurrency } from '@/composables/useCurrency';
 
 const props = defineProps<{
     campaign: any;
@@ -244,6 +245,7 @@ const breadcrumbs = [
 ];
 
 const currencySymbol = computed(() => (window as any).appSettings?.currencySettings?.currencySymbol ?? '$');
+const { formatPrice } = useCurrency();
 
 const contribution = computed(() => {
     if (!props.businessStats?.total_revenue) return 0;

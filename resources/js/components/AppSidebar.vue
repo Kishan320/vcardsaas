@@ -28,10 +28,10 @@
         <!-- Nav -->
         <nav class="flex-1 min-h-0 overflow-y-auto scrollbar-thin py-3 px-2">
             <div v-for="group in visibleGroups" :key="group" class="mb-4">
-                <p v-if="!collapsed" class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 mb-1.5">
+                <p v-if="!collapsed" class="text-[10px] font-semibold uppercase tracking-widest px-3 mb-1.5" :class="groupLabelClass">
                     {{ group }}
                 </p>
-                <div v-else class="border-t border-gray-100 my-2 mx-1" />
+                <div v-else class="border-t my-2 mx-1" :class="borderColorClass" />
                 <template v-for="item in navItemsByGroup(group)" :key="item.id">
                     <!-- Item with children (collapsible) -->
                     <div v-if="canShow(item) && item.children && visibleChildren(item.children).length > 0">
@@ -46,7 +46,7 @@
                             <span class="flex-shrink-0">
                                 <component :is="item.icon" :size="18" />
                             </span>
-                            <span v-if="!collapsed" class="flex-1 truncate text-left">{{ item.label }}</span>
+                            <span v-if="!collapsed" class="flex-1 truncate text-start">{{ item.label }}</span>
                             <ChevronDown
                                 v-if="!collapsed"
                                 :size="14"
@@ -55,14 +55,14 @@
                             />
                             <div
                                 v-if="collapsed"
-                                class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50"
+                                class="absolute start-full ms-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50"
                             >
                                 {{ item.label }}
-                                <div class="absolute top-1/2 -left-1 -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
+                                <div class="absolute top-1/2 -start-1 -translate-y-1/2 border-4 border-transparent border-e-gray-900" />
                             </div>
                         </button>
                         <!-- Children -->
-                        <div v-if="!collapsed && openItems.has(item.id)" class="ml-4 pl-3 border-l mt-0.5 mb-1 space-y-0.5">
+                        <div v-if="!collapsed && openItems.has(item.id)" class="ms-4 ps-3 border-s mt-0.5 mb-1 space-y-0.5" :class="borderColorClass">
                             <Link
                                 v-for="child in visibleChildren(item.children)" :key="child.href"
                                 :href="child.href"
@@ -94,10 +94,10 @@
                         <span v-if="!collapsed" class="flex-1 truncate">{{ item.label }}</span>
                         <div
                             v-if="collapsed"
-                            class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50"
+                            class="absolute start-full ms-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50"
                         >
                             {{ item.label }}
-                            <div class="absolute top-1/2 -left-1 -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
+                            <div class="absolute top-1/2 -start-1 -translate-y-1/2 border-4 border-transparent border-e-gray-900" />
                         </div>
                     </Link>
                 </template>
@@ -105,16 +105,16 @@
         </nav>
 
         <!-- Bottom user -->
-        <div v-if="!collapsed" class="border-t p-3">
-            <div class="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-muted cursor-pointer transition-colors">
+        <div v-if="!collapsed" class="border-t p-3" :class="userSectionClass">
+            <div class="flex items-center gap-3 px-2 py-2 rounded-lg cursor-pointer transition-colors" :class="userHoverClass">
                 <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" :style="{ backgroundColor: primaryColor }">
                     {{ initials }}
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-semibold text-foreground truncate">{{ user?.name }}</p>
-                    <p class="text-xs text-muted-foreground truncate">{{ user?.email }}</p>
+                    <p class="text-sm font-semibold truncate" :class="userNameClass">{{ user?.name }}</p>
+                    <p class="text-xs truncate" :class="userEmailClass">{{ user?.email }}</p>
                 </div>
-                <ChevronRight :size="14" class="text-muted-foreground" />
+                <ChevronRight :size="14" :class="[chevronClass, 'rtl:rotate-180']" />
             </div>
         </div>
     </div>
@@ -138,6 +138,7 @@ const props = defineProps<{
     collapsed: boolean;
     hideLogo?: boolean;
     currentPath?: string;
+    colored?: boolean;
 }>();
 
 const page = usePage<PageProps>();
@@ -156,26 +157,35 @@ const primaryColor = computed(() => {
 });
 
 const activeStyle = computed(() => ({
-    backgroundColor: primaryColor.value + '18',
-    color: primaryColor.value,
+    backgroundColor: props.colored ? 'rgba(255,255,255,0.2)' : primaryColor.value + '18',
+    color: props.colored ? '#ffffff' : primaryColor.value,
 }));
-
-const hoveredItem = ref<string | null>(null);
 
 const hoverStyle = computed(() => ({
-    backgroundColor: primaryColor.value + '12',
-    color: primaryColor.value,
+    backgroundColor: props.colored ? 'rgba(255,255,255,0.12)' : primaryColor.value + '12',
+    color: props.colored ? '#ffffff' : primaryColor.value,
 }));
+
+const defaultTextClass = computed(() => props.colored ? 'text-white/80' : 'text-muted-foreground');
+const groupLabelClass = computed(() => props.colored ? 'text-white/50' : 'text-muted-foreground');
+const borderColorClass = computed(() => props.colored ? 'border-white/10' : 'border-border');
+const userSectionClass = computed(() => props.colored ? 'border-white/10' : 'border-border');
+const userHoverClass = computed(() => props.colored ? 'hover:bg-white/10' : 'hover:bg-muted');
+const userNameClass = computed(() => props.colored ? 'text-white' : 'text-foreground');
+const userEmailClass = computed(() => props.colored ? 'text-white/60' : 'text-muted-foreground');
+const chevronClass = computed(() => props.colored ? 'text-white/50' : 'text-muted-foreground');
+
+const hoveredItem = ref<string | null>(null);
 
 function getItemStyle(key: string, isActiveItem: boolean) {
     if (isActiveItem) return activeStyle.value;
     if (hoveredItem.value === key) return hoverStyle.value;
-    return {};
+    return props.colored ? { color: 'rgba(255,255,255,0.8)' } : {};
 }
 
 function getItemClass(isActiveItem: boolean) {
     if (isActiveItem || hoveredItem.value) return '';
-    return 'text-muted-foreground';
+    return defaultTextClass.value;
 }
 
 // Use light logo for sidebar (light mode default)

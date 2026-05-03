@@ -20,7 +20,7 @@
         </Link>
 
         <div class="hidden md:flex items-center gap-6">
-          <a v-for="item in navLinks" :key="item.id" :href="item.href"
+          <a v-for="item in allNavLinks" :key="item.id" :href="item.href"
             :class="`text-sm font-medium transition-colors ${scrolled ? 'text-gray-600 hover:text-primary-600' : 'text-white/80 hover:text-white'}`">
             {{ item.label }}
           </a>
@@ -46,7 +46,7 @@
     <!-- Mobile Menu -->
     <div v-if="mobileOpen" class="md:hidden bg-white border-t border-gray-100 shadow-lg animate-fade-in">
       <div class="px-4 py-3 space-y-1">
-        <a v-for="item in navLinks" :key="`m-${item.id}`" :href="item.href"
+        <a v-for="item in allNavLinks" :key="`m-${item.id}`" :href="item.href"
           class="block px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
           @click="mobileOpen = false">
           {{ item.label }}
@@ -61,24 +61,41 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { Menu, X, CreditCard } from 'lucide-vue-next';
 
-defineProps<{ 
+interface CustomPage {
+  id: number;
+  title: string;
+  slug: string;
+}
+
+const props = defineProps<{ 
   settings?: any;
   theme?: any;
+  customPages?: CustomPage[];
 }>();
 
 const scrolled = ref(false);
 const mobileOpen = ref(false);
 
-const navLinks = [
+const defaultNavLinks = [
   { id: 'nav-features', label: 'Features', href: '#features' },
   { id: 'nav-templates', label: 'Templates', href: '#templates' },
   { id: 'nav-plans', label: 'Pricing', href: '#plans' },
   { id: 'nav-contact', label: 'Contact', href: '#contact' },
 ];
+
+const allNavLinks = computed(() => {
+  const customPageLinks = (props.customPages || []).map(page => ({
+    id: `custom-${page.id}`,
+    label: page.title,
+    href: `/page/${page.slug}`
+  }));
+  
+  return [...defaultNavLinks, ...customPageLinks];
+});
 
 const handleScroll = () => { scrolled.value = window.scrollY > 20; };
 onMounted(() => window.addEventListener('scroll', handleScroll));

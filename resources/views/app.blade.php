@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', $page['props']['auth']['lang'] ?? app()->getLocale()) }}" @class(['dark' => ($appearance ?? 'system') == 'dark'])>
+<html lang="{{ str_replace('_', '-', $page['props']['auth']['lang'] ?? app()->getLocale()) }}" dir="{{ getSetting('layoutDirection', 'ltr') === 'rtl' ? 'rtl' : 'ltr' }}" @class(['dark' => ($appearance ?? 'system') == 'dark'])>
     <head>
         <base href="{{ \Illuminate\Support\Facades\Request::getBasePath() }}">
         <meta charset="utf-8">
@@ -18,6 +18,10 @@
                         document.documentElement.classList.add('dark');
                     }
                 }
+
+                // Apply layout direction immediately from server setting
+                const layoutDir = '{{ getSetting('layoutDirection', 'ltr') }}';
+                document.documentElement.dir = (layoutDir === 'rtl') ? 'rtl' : 'ltr';
             })();
         </script>
 

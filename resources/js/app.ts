@@ -125,16 +125,25 @@ createInertiaApp({
             }
         }
         
-        // Always initialize theme from DB settings — remove stale localStorage
+        // Always initialize theme from DB settings — skip on landing page (has its own theme)
         if (typeof localStorage !== 'undefined') {
             localStorage.removeItem('themeSettings');
         }
-        initializeTheme(globalSettings);
+        const isLandingPage = window.location.pathname === '/' || window.location.pathname.startsWith('/home');
+        if (!isLandingPage) {
+            initializeTheme(globalSettings);
+        }
 
         // Initialize brand settings
         const user = props.initialPage.props.auth?.user;
         const { initializeBrandSettings } = useBrand();
         initializeBrandSettings(globalSettings, user);
+
+        // Apply direction immediately before Vue mounts
+        const initialDir = (globalSettings as any)?.layoutDirection;
+        if (initialDir) {
+            document.documentElement.dir = initialDir === 'rtl' ? 'rtl' : 'ltr';
+        }
 
         const vueApp = createApp({
             render: () => h(Suspense, {}, {
@@ -172,26 +181,18 @@ createInertiaApp({
                     }
                 }
                 
-                // Re-initialize brand settings
+                // Re-initialize brand settings (skip on landing page)
                 const updatedUser = event.detail.page.props.auth?.user;
-                initializeBrandSettings(updatedGlobalSettings, updatedUser);
+                const isLandingRoute = event.detail.page.url === '/' || event.detail.page.url?.startsWith('/home');
+                if (!isLandingRoute) {
+                    initializeBrandSettings(updatedGlobalSettings, updatedUser);
+                }
                 
                 // Update Pinia store
                 const globalStore = useGlobalStore();
                 globalStore.setGlobalSettings(updatedGlobalSettings);
                 globalStore.setUser(updatedUser);
                 globalStore.setDemoMode(event.detail.page.props?.is_demo || false);
-                
-                // Force dark mode check on navigation
-                const savedTheme = localStorage.getItem('themeSettings');
-                if (savedTheme) {
-                    const themeSettings = JSON.parse(savedTheme);
-                    const isDark = themeSettings.appearance === 'dark' || 
-                        (themeSettings.appearance === 'system' && 
-                         window.matchMedia('(prefers-color-scheme: dark)').matches);
-                    document.documentElement.classList.toggle('dark', isDark);
-                    document.body.classList.toggle('dark', isDark);
-                }
             } catch (e) {
                 console.error('Navigation error:', e);
             }
@@ -209,15 +210,4 @@ if (typeof window !== 'undefined') {
         initializeTheme();
     }
 }
-
-// Initialize direction from localStorage if available
-const initializeDirection = () => {
-    const savedDirection = localStorage.getItem('layoutDirection');
-    if (savedDirection) {
-        document.documentElement.dir = savedDirection;
-        document.documentElement.setAttribute('dir', savedDirection);
-    }
-};
-
-// Initialize direction on page load
-initializeDirection();
+// Direction is applied by initializeBrandSettings on every page load/navigation via BrandContext

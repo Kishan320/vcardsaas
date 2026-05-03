@@ -28,7 +28,7 @@ export const DEFAULT_BRAND_SETTINGS: BrandSettings = {
   customColor: '#3b82f6',
   sidebarVariant: 'inset',
   sidebarStyle: 'plain',
-  layoutDirection: 'left',
+  layoutDirection: 'ltr',
   themeMode: 'light',
 };
 
@@ -52,7 +52,7 @@ export const getBrandSettings = (userSettings?: Record<string, string>): BrandSe
       customColor: userSettings.customColor || DEFAULT_BRAND_SETTINGS.customColor,
       sidebarVariant: userSettings.sidebarVariant || DEFAULT_BRAND_SETTINGS.sidebarVariant,
       sidebarStyle: userSettings.sidebarStyle || DEFAULT_BRAND_SETTINGS.sidebarStyle,
-      layoutDirection: (userSettings.layoutDirection as LayoutPosition) || DEFAULT_BRAND_SETTINGS.layoutDirection,
+      layoutDirection: ((userSettings.layoutDirection as LayoutPosition) || DEFAULT_BRAND_SETTINGS.layoutDirection) as LayoutPosition,
       themeMode: (userSettings.themeMode as Appearance) || DEFAULT_BRAND_SETTINGS.themeMode,
     };
   }

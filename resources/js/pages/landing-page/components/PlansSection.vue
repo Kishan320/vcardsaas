@@ -38,7 +38,7 @@
               <span class="text-4xl font-extrabold text-gray-900">Free</span>
             </div>
             <div v-else class="flex items-end gap-1">
-              <span class="text-4xl font-extrabold text-gray-900">${{ billing === 'yearly' ? plan.yearly_price : plan.price }}</span>
+              <span class="text-4xl font-extrabold text-gray-900">{{ formatPrice(billing === 'yearly' ? plan.yearly_price : plan.price) }}</span>
               <span class="text-gray-400 text-sm mb-1.5">/ {{ billing === 'yearly' ? 'year' : 'month' }}</span>
             </div>
           </div>
@@ -81,8 +81,10 @@
 import { ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { CheckCircle2, Star } from 'lucide-vue-next';
+import { useCurrency } from '@/composables/useCurrency';
 
 defineProps<{ plans?: any[] }>();
 
 const billing = ref<'monthly' | 'yearly'>('monthly');
+const { formatPrice } = useCurrency();
 </script>

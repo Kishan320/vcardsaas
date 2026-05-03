@@ -6,46 +6,96 @@
   color: hsl(var(--foreground));
 }
 
-.dark .bg-white {
+.dark .bg-white:not(.colored-sidebar *) {
   background-color: hsl(var(--card)) !important;
 }
 
-.dark .bg-gray-50 {
+.dark .bg-gray-50:not(.colored-sidebar *) {
   background-color: hsl(222 47% 13%) !important;
 }
 
-.dark .bg-gray-100 {
+.dark .bg-gray-100:not(.colored-sidebar *) {
   background-color: hsl(222 47% 16%) !important;
 }
 
 /* ── Borders ─────────────────────────────────────────────────── */
-.dark .border-gray-100,
-.dark .border-gray-200,
-.dark .border-gray-300 {
+.dark .border-gray-100:not(.colored-sidebar *),
+.dark .border-gray-200:not(.colored-sidebar *),
+.dark .border-gray-300:not(.colored-sidebar *) {
   border-color: hsl(var(--border)) !important;
 }
 
+/* Colored sidebar border overrides */
+.dark .colored-sidebar .border-gray-100,
+.dark .colored-sidebar .border-gray-200,
+.dark .colored-sidebar .border-gray-300,
+.dark .colored-sidebar .border-b,
+.dark .colored-sidebar .border-t,
+.dark .colored-sidebar .border {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
 /* ── Text ────────────────────────────────────────────────────── */
-.dark .text-gray-900 { color: hsl(213 31% 91%) !important; }
-.dark .text-gray-800 { color: hsl(213 31% 85%) !important; }
-.dark .text-gray-700 { color: hsl(215 20% 75%) !important; }
-.dark .text-gray-600 { color: hsl(215 20% 65%) !important; }
-.dark .text-gray-500 { color: hsl(215 20% 55%) !important; }
-.dark .text-gray-400 { color: hsl(215 20% 45%) !important; }
+.dark .text-gray-900:not(.colored-sidebar *) { color: hsl(213 31% 91%) !important; }
+.dark .text-gray-800:not(.colored-sidebar *) { color: hsl(213 31% 85%) !important; }
+.dark .text-gray-700:not(.colored-sidebar *) { color: hsl(215 20% 75%) !important; }
+.dark .text-gray-600:not(.colored-sidebar *) { color: hsl(215 20% 65%) !important; }
+.dark .text-gray-500:not(.colored-sidebar *) { color: hsl(215 20% 55%) !important; }
+.dark .text-gray-400:not(.colored-sidebar *) { color: hsl(215 20% 45%) !important; }
 
 /* ── Sidebar ─────────────────────────────────────────────────── */
-.dark aside,
-.dark .sidebar-transition {
+/* Only apply dark mode background to plain sidebars (not colored/gradient ones) */
+.dark aside:not([style*="background"]):not(.colored-sidebar),
+.dark .sidebar-transition:not([style*="background"]):not(.colored-sidebar) {
   background-color: hsl(var(--card)) !important;
   border-color: hsl(var(--border)) !important;
 }
 
-.dark .hover\:bg-gray-50:hover {
+/* Ensure colored/gradient sidebars maintain their styling in dark mode */
+.dark .colored-sidebar {
+  /* Don't override background - let inline styles take precedence */
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Ensure text and elements inside colored sidebar work properly */
+.dark .colored-sidebar * {
+  /* Let the component handle its own colors */
+}
+
+/* Hover states - only for non-colored sidebars */
+.dark aside:not(.colored-sidebar) .hover\:bg-gray-50:hover,
+.dark .sidebar-transition:not(.colored-sidebar) .hover\:bg-gray-50:hover {
   background-color: hsl(222 47% 18%) !important;
 }
 
-.dark .hover\:bg-gray-100:hover {
+.dark aside:not(.colored-sidebar) .hover\:bg-gray-100:hover,
+.dark .sidebar-transition:not(.colored-sidebar) .hover\:bg-gray-100:hover {
   background-color: hsl(222 47% 20%) !important;
+}
+
+/* Ensure colored sidebar borders work in floating variant */
+.dark .colored-sidebar.border {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Ensure colored sidebar maintains proper text contrast */
+.dark .colored-sidebar .text-white\/80,
+.dark .colored-sidebar .text-white\/60,
+.dark .colored-sidebar .text-white\/50 {
+  /* Maintain white text colors on colored backgrounds */
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.dark .colored-sidebar .text-white\/60 {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.dark .colored-sidebar .text-white\/50 {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.dark .colored-sidebar .text-white {
+  color: rgba(255, 255, 255, 1) !important;
 }
 
 /* ── Topbar ──────────────────────────────────────────────────── */

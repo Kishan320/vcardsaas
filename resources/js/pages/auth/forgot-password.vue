@@ -48,7 +48,7 @@
 
         <p class="mt-6 text-center text-sm text-[hsl(var(--muted-foreground))]">
             Remember your password?
-            <Link :href="route('login')" class="font-semibold text-primary-600 hover:text-primary-700 transition-colors">
+            <Link :href="route('login')" class="font-semibold transition-colors" :style="{ color: 'var(--theme-color)' }">
                 Sign in
             </Link>
         </p>

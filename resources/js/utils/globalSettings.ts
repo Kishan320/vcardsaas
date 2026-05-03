@@ -41,7 +41,7 @@ export function initializeGlobalSettings(settings: Record<string, any>) {
         currencySymbolPosition: settings.currencySymbolPosition || 'before',
         currencySymbol: settings.currencySymbol || '$',
         currencyCode: settings.currencyCode || 'USD',
-        currencyName: settings.currencyNname || 'US Dollar'
+        currencyName: settings.currencyName || 'US Dollar'
     };
 
     window.appSettings = {

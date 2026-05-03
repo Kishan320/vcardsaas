@@ -121,7 +121,7 @@
                                 <td class="px-4 py-3 text-sm text-gray-600">{{ formatDate(campaign.start_date) }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-600">{{ formatDate(campaign.end_date) }}</td>
                                 <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ campaign.total_days }} days</td>
-                                <td class="px-4 py-3 text-sm font-medium text-gray-900">${{ parseFloat(campaign.total_amount).toFixed(2) }}</td>
+                                <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ formatPrice(campaign.total_amount) }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-600 capitalize">{{ formatPaymentMethod(campaign.payment_method) }}</td>
                                 <td class="px-4 py-3">
                                     <span class="text-xs px-2.5 py-1 rounded-full font-medium capitalize"
@@ -222,11 +222,11 @@
                         </div>
                         <div class="flex justify-between text-gray-600">
                             <span>Price per Day</span>
-                            <span class="font-medium text-gray-900">${{ pricePerDay.toFixed(2) }}</span>
+                            <span class="font-medium text-gray-900">{{ formatPrice(pricePerDay) }}</span>
                         </div>
                         <div class="flex justify-between font-semibold text-gray-900 border-t border-gray-200 pt-1.5 mt-1.5">
                             <span>Total Amount</span>
-                            <span>${{ totalAmount.toFixed(2) }}</span>
+                            <span>{{ formatPrice(totalAmount) }}</span>
                         </div>
                     </div>
 
@@ -285,6 +285,7 @@ import InputLabel from '@/components/ui/InputLabel.vue';
 import InputError from '@/components/ui/InputError.vue';
 import TextInput from '@/components/ui/TextInput.vue';
 import PrimaryButton from '@/components/ui/PrimaryButton.vue';
+import { useCurrency } from '@/composables/useCurrency';
 
 interface Campaign {
     id: number; name: string; description?: string; status: string; is_active: boolean;
@@ -303,6 +304,8 @@ const props = defineProps<{
     filters?: { search?: string; status?: string; user_id?: string; business_id?: string; start_date?: string; end_date?: string; sort_field?: string; sort_direction?: string; per_page?: string };
     campaignSettings?: { pricing_tiers?: PricingTier[] };
 }>();
+
+const { formatPrice } = useCurrency();
 
 // Filter state
 const searchTerm = ref(props.filters?.search ?? '');
